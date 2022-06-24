@@ -25,7 +25,7 @@ SECRET_KEY = '$+ygh%8kjg&=12lba27sbvdrf9c-gniw8!wtu%v0&p&7!xa@76'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.1.229","localhost","127.0.0.1","172.28.166.117"]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -82,7 +82,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'solecare',
         'USER': 'solecare',
-        'PASSWORD': 'solecare',
+        'PASSWORD': 'Solecare2022?',
         'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }

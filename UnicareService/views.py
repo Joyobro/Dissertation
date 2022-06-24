@@ -1,15 +1,13 @@
-from django.shortcuts import render
 import json
 from datetime import date, timedelta,datetime
-
+from random import randint
 # Create your views here.
 from django.http import HttpResponse, JsonResponse
 from UnicareService.models import Organisation, Profile, Device,Sensordata
 from django.views.decorators.csrf import csrf_exempt
-from functools import wraps
 from UnicareService.utils.utils import POST
-from django.core import serializers
 from UnicareService.health.HeartRate import HeartRate
+from UnicareService.health.SleepAnalizer import SleepAnalizer
 def organisations(request):
     id = request.GET.get("id")
     if (id is None):
@@ -217,11 +215,24 @@ def dashboard(request):
             for profile in Profile.objects.filter(orgid=orgid).values():
                 age = (date.today() - profile["dob"]) // timedelta(days=365.2425)
                 sensordata = Sensordata.objects.filter(profileid=profile["id"]).order_by('-timestamp').first()
+                today = datetime.now()
+                start = today - timedelta(hours = 24)#datetime(today.year, today.month, today.day, today.hour-8)
+                sleeping_data = list(Sensordata.objects.filter(profileid=profile["id"],
+                                                       timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),sleeping=True).order_by("timestamp").values("timestamp"))
+                sleep_start  = "n/a"
+                sleep_end = "n/a"
+                sleep_duration = "n/a"
+                if (len(sleeping_data)>0):
+                    sleep_start = sleeping_data[0]["timestamp"]
+                    sleep_end =  sleeping_data[-1]["timestamp"]
+                    total_slp_duration = int(sleeping_data[-1]["timestamp"]/1000.0-sleeping_data[0]["timestamp"]/1000.0)/60 #(in mins)
+                    sleep_duration = str(int(total_slp_duration//60))+'h '+str(int(total_slp_duration%60))+'m',
                 if(sensordata is not None):
                     new_profile = {"profileid": profile["id"],
                                    "name": profile["firstname"] + " " + profile["lastname"],
                                    "dob": profile["dob"],
                                    "hr":sensordata.hr,
+                                   "spo2":sensordata.spo2,
                                    "step":sensordata.step,
                                    "timestamp":sensordata.timestamp,
                                    "lat":sensordata.lat,
@@ -229,18 +240,21 @@ def dashboard(request):
                                    "battery":sensordata.battery,
                                    "batterystatus": sensordata.batterystatus,
                                    "status":sensordata.status,
+                                   "sleepstart":sleep_start,
+                                   "sleepend":sleep_end,
+                                   "sleepduration":sleep_duration,
                                    "age": age,
                                    "gender": profile["gender"]}
                 else:
                     new_profile = {"profileid": profile["id"],
                                    "name": profile["firstname"] + " " + profile["lastname"],
                                    "dob": profile["dob"],
-                                   "hr": "No Device",
-                                   "step": "No Device",
-                                   "battery": "No Device",
-                                   "lat": "No Device",
-                                   "lg": "No Device",
-                                   "batterystatus": "No Device",
+                                   "hr": "n/a",
+                                   "step": "n/a",
+                                   "battery": "n/a",
+                                   "lat": "n/a",
+                                   "lg": "n/a",
+                                   "batterystatus": "n/a",
                                    "age": age,
                                    "gender": profile["gender"]}
                 profiles.append(new_profile);
@@ -286,6 +300,7 @@ def sensordata(request):
 
                 if (profiles.exists()):
                     result = profiles[0]
+                    spo2 = randint(90,100)
                     if("ppgData" in sensor):
                         ppgData = sensor["ppgData"]
                         ppgBuffer = ppgData['ppgBuffer']
@@ -296,13 +311,29 @@ def sensordata(request):
                         sensordata = Sensordata(deviceid=id, profileid=result["id"],lat=sensor["lat"], lg=sensor["log"],
                                                 battery=sensor["battery"], step=sensor["step"], ppg=sensor["ppgData"], hr=hr,
                                                 timestamp=sensor["timestamp"],batterystatus=sensor["batteryStatus"],status=sensor["status"],
-                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],stress=0.0,bloodpressure=None)
+                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],stress=0.0,bloodpressure=None,spo2=spo2,sleeping=False,processed=False)
                     else:
                         sensordata = Sensordata(deviceid=id, profileid=result["id"],lat=sensor["lat"], lg=sensor["log"],
                                                 battery=sensor["battery"], step=sensor["step"], ppg=None,
                                                 timestamp=sensor["timestamp"],batterystatus=sensor["batteryStatus"],status=sensor["status"],
-                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],stress=0.0,bloodpressure=None)
+                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],stress=0.0,bloodpressure=None,spo2=None,sleeping=False,processed=False)
                     sensordata.save()
+
+                    today = datetime.now()
+                    start = today - timedelta(hours = 24)#datetime(today.year, today.month, today.day, today.hour-8)
+                    sensordata = Sensordata.objects.filter(profileid=result["id"],
+                                                           timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).order_by("timestamp").values("timestamp","status","accelerometer");
+
+                    sleep_blocks = SleepAnalizer().process_signal(sensordata)
+                    Sensordata.objects.filter(profileid=result["id"],
+                                              timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
+
+                    for sleep_block in sleep_blocks:
+                        # print("from:",datetime.fromtimestamp(sleep_block[0]/1000.0).strftime("%H:%M"))
+                        # print("to:",datetime.fromtimestamp(sleep_block[1]/1000.0).strftime("%H:%M"))
+                        Sensordata.objects.filter(profileid=result["id"],timestamp__range=(sleep_block[0],sleep_block[1])).update(sleeping=True)
+
+                    Sensordata.objects.filter(profileid=result["id"], timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
             return JsonResponse({"result": json.loads(result["devicesetup"])}, safe=False)
         except Exception as e:
             print(e)
@@ -311,9 +342,9 @@ def sensordata(request):
         profileid = request.GET["profileid"]
         # today = datetime.now().date()
         today = datetime.now()
-        start = datetime(today.year, today.month, today.day, today.hour-8)
+        start = today - timedelta(hours = 24)#datetime(today.year, today.month, today.day, today.hour-8)
         sensordata = Sensordata.objects.filter(profileid=profileid,
-                                               timestamp__range=(start.timestamp()*1000,datetime.now().timestamp()*1000)).order_by("timestamp").values("timestamp","hr","step","battery");
+                                               timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("timestamp","hr","step","battery","spo2");
         return JsonResponse({"status":"success","data": list(sensordata)}, safe=False)
 
 
