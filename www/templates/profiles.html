@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>
+        Unicare - admin - UnicareAdmin
+    </title>
+    <meta name="description" content="Page Titile">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, minimal-ui">
+    <!-- Call App Mode on ios devices -->
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <!-- Remove Tap Highlight on Windows Phone IE -->
+    <meta name="msapplication-tap-highlight" content="no">
+    <!-- base css -->
+    <link rel="stylesheet" media="screen, print" href="{% static  'css/vendors.bundle.css' %}">
+    <link rel="stylesheet" media="screen, print" href="{% static 'css/app.bundle.css' %}">
+    <!-- Place favicon.ico in the root directory -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/favicon/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon/favicon-32x32.png' %}">
+    <link rel="mask-icon" href="{% static 'img/favicon/safari-pinned-tab.svg' %}" color="#5bbad5">
+    <link rel="stylesheet" media="screen, print" href="{% static 'css/datagrid/datatables/datatables.bundle.css' %}">
+    <link rel="stylesheet" media="screen, print" href="{% static 'css/theme-demo.css' %}">
+    <link rel="stylesheet" media="screen, print"
+          href="{% static 'css/formplugins/bootstrap-datepicker/bootstrap-datepicker.css' %}">
+    <!--<link rel="stylesheet" media="screen, print" href="css/your_styles.css">-->
+</head>
+<body class="mod-bg-1 ">
+<!-- DOC: script to save and load page settings -->
+<script>
+    /**
+     *    This script should be placed right after the body tag for fast execution
+     *    Note: the script is written in pure javascript and does not depend on thirdparty library
+     **/
+    'use strict';
+
+    var classHolder = document.getElementsByTagName("BODY")[0],
+        /**
+         * Load from localstorage
+         **/
+        themeSettings = (localStorage.getItem('themeSettings')) ? JSON.parse(localStorage.getItem('themeSettings')) :
+            {},
+        themeURL = themeSettings.themeURL || '',
+        themeOptions = themeSettings.themeOptions || '';
+    /**
+     * Load theme options
+     **/
+    if (themeSettings.themeOptions) {
+        classHolder.className = themeSettings.themeOptions;
+        console.log("%c✔ Theme settings loaded", "color: #148f32");
+    } else {
+        console.log("Heads up! Theme settings is empty or does not exist, loading default settings...");
+    }
+    if (themeSettings.themeURL && !document.getElementById('mytheme')) {
+        var cssfile = document.createElement('link');
+        cssfile.id = 'mytheme';
+        cssfile.rel = 'stylesheet';
+        cssfile.href = themeURL;
+        document.getElementsByTagName('head')[0].appendChild(cssfile);
+    }
+    /**
+     * Save to localstorage
+     **/
+    var saveSettings = function () {
+        themeSettings.themeOptions = String(classHolder.className).split(/[^\w-]+/).filter(function (item) {
+            return /^(nav|header|mod|display)-/i.test(item);
+        }).join(' ');
+        if (document.getElementById('mytheme')) {
+            themeSettings.themeURL = document.getElementById('mytheme').getAttribute("href");
+        }
+        ;
+        localStorage.setItem('themeSettings', JSON.stringify(themeSettings));
+    }
+    /**
+     * Reset settings
+     **/
+    var resetSettings = function () {
+        localStorage.setItem("themeSettings", "");
+    }
+
+</script>
+<!-- BEGIN Page Wrapper -->
+<div class="page-wrapper">
+    <div class="page-inner">
+        <!-- BEGIN Left Aside -->
+        <aside class="page-sidebar">
+            <div class="page-logo">
+
+                <img src="{% static 'img/logo.png' %}" alt="SmartAdmin WebApp" aria-roledescription="logo">
+                <span class="page-logo-text mr-1">UnicareAdmin Panel</span>
+                <span class="position-absolute text-white opacity-50 small pos-top pos-right mr-2 mt-n2"></span>
+                <i class="fal fa-angle-down d-inline-block ml-1 fs-lg color-primary-300"></i>
+            </div>
+            <!-- BEGIN PRIMARY NAVIGATION -->
+            <nav id="js-primary-nav" class="primary-nav" role="navigation">
+                <div class="nav-filter">
+                    <div class="position-relative">
+                        <input type="text" id="nav_filter_input" placeholder="Filter menu" class="form-control"
+                               tabindex="0">
+                        <a href="#" onclick="return false;" class="btn-primary btn-search-close js-waves-off"
+                           data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar">
+                            <i class="fal fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <img src="{% static 'img/demo/avatars/avatar-m.png' %}" class="profile-image rounded-circle"
+                         alt="{{ user.get_full_name }}">
+                    <div class="info-card-text">
+                        <a href="#" class="d-flex align-items-center text-white">
+                                    <span class="text-truncate text-truncate-sm d-inline-block">
+                                       {{ user.get_full_name }}
+                                    </span>
+                        </a>
+                        <span class="d-inline-block text-truncate text-truncate-sm">{{ user.email }}</span>
+                    </div>
+                    <img src="{% static 'img/card-backgrounds/cover-2-lg.png' %}" class="cover" alt="cover">
+                    <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle"
+                       data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                        <i class="fal fa-angle-down"></i>
+                    </a>
+                </div>
+                <ul id="js-nav-menu" class="nav-menu">
+                      <li>
+                        <a href="{% url 'portal:dashboard' %}" title="Monitoring Dashboard"
+                           data-filter-tags="Monitoring Dashboard">
+                            <i class="fal fa-chart-bar"></i>
+                            <span class="nav-link-text" data-i18n="nav.application_intel">Monitoring Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'portal:profiles' %}" title="Manage Profiles"
+                           data-filter-tags="Manage Profiles">
+                            <i class="fal fa-users"></i>
+                            <span class="nav-link-text" data-i18n="nav.application_intel">Manage Profiles</span>
+                        </a>
+
+                    </li>
+                    <li>
+                        <a href="#" title="Manage Carers" data-filter-tags="Manage Carers">
+                            <i class="fal fa-user-md"></i>
+                            <span class="nav-link-text" data-i18n="nav.theme_settings">Manage Carers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'portal:devices' %}" title="Manage Devices" data-filter-tags="Manage Devices">
+                            <i class="fal fa-watch"></i>
+                            <span class="nav-link-text" data-i18n="nav.theme_settings">Manage Devices</span>
+                        </a>
+                    </li>
+
+                </ul>
+                <div class="filter-message js-filter-message bg-success-600"></div>
+            </nav>
+            <!-- END PRIMARY NAVIGATION -->
+            <!-- NAV FOOTER -->
+
+        </aside>
+        <!-- END Left Aside -->
+        <div class="page-content-wrapper">
+            <!-- BEGIN Page Header -->
+            <header class="page-header" role="banner">
+                <!-- we need this logo when user switches to nav-function-top -->
+                <div class="page-logo">
+                    <a href="#" class="page-logo-link press-scale-down d-flex align-items-center position-relative"
+                       data-toggle="modal" data-target="#modal-shortcut">
+                        <img src="{% static 'img/logo.png' %}" alt="SmartAdmin WebApp" aria-roledescription="logo">
+                        <span class="page-logo-text mr-1">UnicareAdmin WebApp</span>
+                        <span class="position-absolute text-white opacity-50 small pos-top pos-right mr-2 mt-n2"></span>
+                        <i class="fal fa-angle-down d-inline-block ml-1 fs-lg color-primary-300"></i>
+                    </a>
+                </div>
+                <!-- DOC: nav menu layout change shortcut -->
+                <div class="hidden-md-down dropdown-icon-menu position-relative">
+                    <a href="#" class="header-btn btn js-waves-off" data-action="toggle"
+                       data-class="nav-function-hidden" title="Hide Navigation">
+                        <i class="ni ni-menu"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="#" class="btn js-waves-off" data-action="toggle" data-class="nav-function-minify"
+                               title="Minify Navigation">
+                                <i class="ni ni-minify-nav"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="btn js-waves-off" data-action="toggle" data-class="nav-function-fixed"
+                               title="Lock Navigation">
+                                <i class="ni ni-lock-nav"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- DOC: mobile button appears during mobile width -->
+                <div class="hidden-lg-up">
+                    <a href="#" class="header-btn btn press-scale-down" data-action="toggle" data-class="mobile-nav-on">
+                        <i class="ni ni-menu"></i>
+                    </a>
+                </div>
+                <div class="search">
+                    <form class="app-forms hidden-xs-down" role="search" action="page_search.html" autocomplete="off">
+                        <input type="text" id="search-field" placeholder="Search for anything" class="form-control"
+                               tabindex="1">
+                        <a href="#" onclick="return false;" class="btn-danger btn-search-close js-waves-off d-none"
+                           data-action="toggle" data-class="mobile-search-on">
+                            <i class="fal fa-times"></i>
+                        </a>
+                    </form>
+                </div>
+                <div class="ml-auto d-flex">
+                    <!-- activate app search icon (mobile) -->
+                    <div class="hidden-sm-up">
+                        <a href="#" class="header-icon" data-action="toggle" data-class="mobile-search-on"
+                           data-focus="search-field" title="Search">
+                            <i class="fal fa-search"></i>
+                        </a>
+                    </div>
+                    <!-- app settings -->
+                    <div class="hidden-md-down">
+                        <a href="#" class="header-icon" data-toggle="modal" data-target=".js-modal-settings">
+                            <i class="fal fa-cog"></i>
+                        </a>
+                    </div>
+
+
+                    <!-- app notification -->
+                    <div>
+                        <a href="#" class="header-icon" data-toggle="dropdown" title="You got 11 notifications">
+                            <i class="fal fa-bell"></i>
+                            <span class="badge badge-icon">0</span>
+                        </a>
+
+
+                    </div>
+                    <!-- app user menu -->
+                    <div>
+                        <a href="#" data-toggle="dropdown" title="drlantern@gotbootstrap.com"
+                           class="header-icon d-flex align-items-center justify-content-center ml-2">
+                            <img src="{% static 'img/demo/avatars/avatar-m.png' %}"
+                                 class="profile-image rounded-circle" alt="{{ user.get_full_name }}">
+                            <!-- you can also add username next to the avatar with the codes below:
+                            <span class="ml-1 mr-1 text-truncate text-truncate-header hidden-xs-down">Me</span>
+                            <i class="ni ni-chevron-down hidden-xs-down"></i> -->
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-animated dropdown-lg">
+                            <div class="dropdown-header bg-trans-gradient d-flex flex-row py-4 rounded-top">
+                                <div class="d-flex flex-row align-items-center mt-1 mb-1 color-white">
+                                            <span class="mr-2">
+                                                <img src="{% static 'img/demo/avatars/avatar-m.png' %}"
+                                                     class="rounded-circle profile-image"
+                                                     alt="{{ user.get_full_name }}">
+                                            </span>
+                                    <div class="info-card-text">
+                                        <div class="fs-lg text-truncate text-truncate-lg">{{ user.get_full_name }}</div>
+                                        <span class="text-truncate text-truncate-sm opacity-80">{{ user.last_login }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider m-0"></div>
+                            <a href="#" class="dropdown-item" data-toggle="modal" data-target=".js-modal-settings">
+                                <span data-i18n="drpdwn.settings">Settings</span>
+                            </a>
+                            <div class="dropdown-divider m-0"></div>
+                            <div class="dropdown-multilevel dropdown-multilevel-left">
+                                <div class="dropdown-item">
+                                    Language
+                                </div>
+                                <div class="dropdown-menu">
+                                    <a href="#?lang=fr" class="dropdown-item" data-action="lang"
+                                       data-lang="fr">Français</a>
+                                    <a href="#?lang=en" class="dropdown-item active" data-action="lang" data-lang="en">English
+                                        (US)</a>
+                                    <a href="#?lang=es" class="dropdown-item" data-action="lang"
+                                       data-lang="es">Español</a>
+                                    <a href="#?lang=ru" class="dropdown-item" data-action="lang" data-lang="ru">Русский
+                                        язык</a>
+                                    <a href="#?lang=jp" class="dropdown-item" data-action="lang" data-lang="jp">日本語</a>
+                                    <a href="#?lang=ch" class="dropdown-item" data-action="lang" data-lang="ch">中文</a>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider m-0"></div>
+                            <a class="dropdown-item fw-500 pt-3 pb-3" href="page_login_alt.html">
+                                <span data-i18n="drpdwn.page-logout">My Profile</span>
+                            </a>
+                            <div class="dropdown-divider m-0"></div>
+                            <a id="logoutbuntton" class="dropdown-item fw-500 pt-3 pb-3"
+                               href="{% url 'service:adminsignout' %}">
+                                <span data-i18n="drpdwn.page-logout">Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- END Page Header -->
+            <!-- BEGIN Page Content -->
+            <!-- the #js-page-content id is needed for some plugins to initialize -->
+            <main id="js-page-content" role="main" class="page-content">
+                <ol class="breadcrumb page-breadcrumb">
+                    <li class="position-absolute pos-top pos-right d-none d-sm-block"><span class="js-get-date"></span>
+                    </li>
+                </ol>
+                <div class="subheader">
+                    <h1 class="subheader-title">
+                        <i class='subheader-icon fal fa-users'></i> Profiles: <span
+                            class='fw-300'>Manage Elderly Here</span> <sup
+                            class='badge badge-primary fw-500'>ADDON</sup>
+                        <small>
+                            Add/Remove/Update Elderly Information
+                        </small>
+                    </h1>
+                </div>
+                <div class="alert alert-primary">
+                    <div class="d-flex flex-start w-100">
+                        <div class="mr-2 hidden-md-down">
+                                    <span class="icon-stack icon-stack-lg">
+                                        <i class="base base-2 icon-stack-3x opacity-100 color-primary-500"></i>
+                                        <i class="base base-2 icon-stack-2x opacity-100 color-primary-300"></i>
+                                        <i class="fal fa-info icon-stack-1x opacity-100 color-white"></i>
+                                    </span>
+                        </div>
+                        <div class="d-flex flex-fill">
+                            <div class="flex-fill">
+                                <span class="h5">NOTE:</span>
+                                <p>
+                                    Profiles of elderly have to be created first, followed by assigning an unallocated
+                                    smartdevice to the elderly.
+                                    All the important configurations (e.g. SOS numbers, Safety Zone Range) for the
+                                    smartwatchs
+                                    to work properly have to be created&maintained for each elderly.
+                                </p>
+                                <p class="m-0">
+                                    Once a smarwatch is assigned to an elderly, it cannot be used for others before it
+                                    is de-assigned.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div id="panel-1" class="panel">
+                            <div class="panel-container show">
+
+                                <div class="row">
+                                    <div class="col-xl-12">
+                                        <!-- datatable start -->
+                                        <table id="profiletable"
+                                               class="table table-bordered table-hover table-striped w-100"></table>
+                                        <!-- datatable end -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <!-- this overlay is activated only when mobile menu is triggered -->
+            <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+            <!-- END Page Content -->
+            <!-- BEGIN Page Footer -->
+            <footer class="page-footer" role="contentinfo">
+                <div class="d-flex align-items-center flex-1 text-muted">
+                    <span class="hidden-md-down fw-700">2019 © Unicare </span>
+                </div>
+                <div>
+                    <ul class="list-table m-0">
+                        <li><a href="intel_introduction.html" class="text-secondary fw-700">About</a></li>
+                        <li class="pl-3"><a href="info_app_licensing.html" class="text-secondary fw-700">License</a>
+                        </li>
+
+                    </ul>
+                </div>
+            </footer>
+            <!-- END Page Footer -->
+            <!-- BEGIN Shortcuts -->
+
+            <!-- END Shortcuts -->
+            <!-- BEGIN Color profile -->
+            <!-- this area is hidden and will not be seen on screens or screen readers -->
+            <!-- we use this only for CSS color refernce for JS stuff -->
+            <p id="js-color-profile" class="d-none">
+                <span class="color-primary-50"></span>
+                <span class="color-primary-100"></span>
+                <span class="color-primary-200"></span>
+                <span class="color-primary-300"></span>
+                <span class="color-primary-400"></span>
+                <span class="color-primary-500"></span>
+                <span class="color-primary-600"></span>
+                <span class="color-primary-700"></span>
+                <span class="color-primary-800"></span>
+                <span class="color-primary-900"></span>
+                <span class="color-info-50"></span>
+                <span class="color-info-100"></span>
+                <span class="color-info-200"></span>
+                <span class="color-info-300"></span>
+                <span class="color-info-400"></span>
+                <span class="color-info-500"></span>
+                <span class="color-info-600"></span>
+                <span class="color-info-700"></span>
+                <span class="color-info-800"></span>
+                <span class="color-info-900"></span>
+                <span class="color-danger-50"></span>
+                <span class="color-danger-100"></span>
+                <span class="color-danger-200"></span>
+                <span class="color-danger-300"></span>
+                <span class="color-danger-400"></span>
+                <span class="color-danger-500"></span>
+                <span class="color-danger-600"></span>
+                <span class="color-danger-700"></span>
+                <span class="color-danger-800"></span>
+                <span class="color-danger-900"></span>
+                <span class="color-warning-50"></span>
+                <span class="color-warning-100"></span>
+                <span class="color-warning-200"></span>
+                <span class="color-warning-300"></span>
+                <span class="color-warning-400"></span>
+                <span class="color-warning-500"></span>
+                <span class="color-warning-600"></span>
+                <span class="color-warning-700"></span>
+                <span class="color-warning-800"></span>
+                <span class="color-warning-900"></span>
+                <span class="color-success-50"></span>
+                <span class="color-success-100"></span>
+                <span class="color-success-200"></span>
+                <span class="color-success-300"></span>
+                <span class="color-success-400"></span>
+                <span class="color-success-500"></span>
+                <span class="color-success-600"></span>
+                <span class="color-success-700"></span>
+                <span class="color-success-800"></span>
+                <span class="color-success-900"></span>
+                <span class="color-fusion-50"></span>
+                <span class="color-fusion-100"></span>
+                <span class="color-fusion-200"></span>
+                <span class="color-fusion-300"></span>
+                <span class="color-fusion-400"></span>
+                <span class="color-fusion-500"></span>
+                <span class="color-fusion-600"></span>
+                <span class="color-fusion-700"></span>
+                <span class="color-fusion-800"></span>
+                <span class="color-fusion-900"></span>
+            </p>
+            <!-- END Color profile -->
+        </div>
+    </div>
+</div>
+
+<!-- END Messenger -->
+<!-- BEGIN Page Settings -->
+<div class="modal fade js-modal-settings modal-backdrop-transparent" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-right modal-md">
+        <div class="modal-content">
+            <div class="dropdown-header bg-trans-gradient d-flex justify-content-center align-items-center w-100">
+                <h4 class="m-0 text-center color-white">
+                    Layout Settings
+                    <small class="mb-0 opacity-80">User Interface Settings</small>
+                </h4>
+                <button type="button" class="close text-white position-absolute pos-top pos-right p-2 m-1 mr-2"
+                        data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="settings-panel">
+                    <div class="mt-4 d-table w-100 px-5">
+                        <div class="d-table-cell align-middle">
+                            <h5 class="p-0">
+                                App Layout
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="list" id="fh">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="header-function-fixed"></a>
+                        <span class="onoffswitch-title">Fixed Header</span>
+                        <span class="onoffswitch-title-desc">header is in a fixed at all times</span>
+                    </div>
+                    <div class="list" id="nff">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-function-fixed"></a>
+                        <span class="onoffswitch-title">Fixed Navigation</span>
+                        <span class="onoffswitch-title-desc">left panel is fixed</span>
+                    </div>
+                    <div class="list" id="nfm">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-function-minify"></a>
+                        <span class="onoffswitch-title">Minify Navigation</span>
+                        <span class="onoffswitch-title-desc">Skew nav to maximize space</span>
+                    </div>
+                    <div class="list" id="nfh">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-function-hidden"></a>
+                        <span class="onoffswitch-title">Hide Navigation</span>
+                        <span class="onoffswitch-title-desc">roll mouse on edge to reveal</span>
+                    </div>
+                    <div class="list" id="nft">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-function-top"></a>
+                        <span class="onoffswitch-title">Top Navigation</span>
+                        <span class="onoffswitch-title-desc">Relocate left pane to top</span>
+                    </div>
+                    <div class="list" id="mmb">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-main-boxed"></a>
+                        <span class="onoffswitch-title">Boxed Layout</span>
+                        <span class="onoffswitch-title-desc">Encapsulates to a container</span>
+                    </div>
+                    <div class="expanded">
+                        <ul class="">
+                            <li>
+                                <div class="bg-fusion-50" data-action="toggle" data-class="mod-bg-1"></div>
+                            </li>
+                            <li>
+                                <div class="bg-warning-200" data-action="toggle" data-class="mod-bg-2"></div>
+                            </li>
+                            <li>
+                                <div class="bg-primary-200" data-action="toggle" data-class="mod-bg-3"></div>
+                            </li>
+                            <li>
+                                <div class="bg-success-300" data-action="toggle" data-class="mod-bg-4"></div>
+                            </li>
+                        </ul>
+                        <div class="list" id="mbgf">
+                            <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                               data-class="mod-fixed-bg"></a>
+                            <span class="onoffswitch-title">Fixed Background</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-table w-100 px-5">
+                        <div class="d-table-cell align-middle">
+                            <h5 class="p-0">
+                                Mobile Menu
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="list" id="nmp">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-mobile-push"></a>
+                        <span class="onoffswitch-title">Push Content</span>
+                        <span class="onoffswitch-title-desc">Content pushed on menu reveal</span>
+                    </div>
+                    <div class="list" id="nmno">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-mobile-no-overlay"></a>
+                        <span class="onoffswitch-title">No Overlay</span>
+                        <span class="onoffswitch-title-desc">Removes mesh on menu reveal</span>
+                    </div>
+                    <div class="list" id="sldo">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-mobile-slide-out"></a>
+                        <span class="onoffswitch-title">Off-Canvas <sup>(beta)</sup></span>
+                        <span class="onoffswitch-title-desc">Content overlaps menu</span>
+                    </div>
+                    <div class="mt-4 d-table w-100 px-5">
+                        <div class="d-table-cell align-middle">
+                            <h5 class="p-0">
+                                Accessibility
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="list" id="mbf">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-bigger-font"></a>
+                        <span class="onoffswitch-title">Bigger Content Font</span>
+                        <span class="onoffswitch-title-desc">content fonts are bigger for readability</span>
+                    </div>
+                    <div class="list" id="mhc">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-high-contrast"></a>
+                        <span class="onoffswitch-title">High Contrast Text (WCAG 2 AA)</span>
+                        <span class="onoffswitch-title-desc">4.5:1 text contrast ratio</span>
+                    </div>
+                    <div class="list" id="mcb">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-color-blind"></a>
+                        <span class="onoffswitch-title">Daltonism <sup>(beta)</sup> </span>
+                        <span class="onoffswitch-title-desc">color vision deficiency</span>
+                    </div>
+                    <div class="list" id="mpc">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-pace-custom"></a>
+                        <span class="onoffswitch-title">Preloader Inside</span>
+                        <span class="onoffswitch-title-desc">preloader will be inside content</span>
+                    </div>
+                    <div class="mt-4 d-table w-100 px-5">
+                        <div class="d-table-cell align-middle">
+                            <h5 class="p-0">
+                                Global Modifications
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="list" id="mcbg">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-clean-page-bg"></a>
+                        <span class="onoffswitch-title">Clean Page Background</span>
+                        <span class="onoffswitch-title-desc">adds more whitespace</span>
+                    </div>
+                    <div class="list" id="mhni">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-hide-nav-icons"></a>
+                        <span class="onoffswitch-title">Hide Navigation Icons</span>
+                        <span class="onoffswitch-title-desc">invisible navigation icons</span>
+                    </div>
+                    <div class="list" id="dan">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-disable-animation"></a>
+                        <span class="onoffswitch-title">Disable CSS Animation</span>
+                        <span class="onoffswitch-title-desc">Disables CSS based animations</span>
+                    </div>
+                    <div class="list" id="mhic">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-hide-info-card"></a>
+                        <span class="onoffswitch-title">Hide Info Card</span>
+                        <span class="onoffswitch-title-desc">Hides info card from left panel</span>
+                    </div>
+                    <div class="list" id="mlph">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-lean-subheader"></a>
+                        <span class="onoffswitch-title">Lean Subheader</span>
+                        <span class="onoffswitch-title-desc">distinguished page header</span>
+                    </div>
+                    <div class="list" id="mnl">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-nav-link"></a>
+                        <span class="onoffswitch-title">Hierarchical Navigation</span>
+                        <span class="onoffswitch-title-desc">Clear breakdown of nav links</span>
+                    </div>
+                    <div class="list mt-1">
+                        <span class="onoffswitch-title">Global Font Size <small>(RESETS ON REFRESH)</small> </span>
+                        <div class="btn-group btn-group-sm btn-group-toggle my-2" data-toggle="buttons">
+                            <label class="btn btn-default btn-sm" data-action="toggle-swap" data-class="root-text-sm"
+                                   data-target="html">
+                                <input type="radio" name="changeFrontSize"> SM
+                            </label>
+                            <label class="btn btn-default btn-sm" data-action="toggle-swap" data-class="root-text"
+                                   data-target="html">
+                                <input type="radio" name="changeFrontSize" checked=""> MD
+                            </label>
+                            <label class="btn btn-default btn-sm" data-action="toggle-swap" data-class="root-text-lg"
+                                   data-target="html">
+                                <input type="radio" name="changeFrontSize"> LG
+                            </label>
+                            <label class="btn btn-default btn-sm" data-action="toggle-swap" data-class="root-text-xl"
+                                   data-target="html">
+                                <input type="radio" name="changeFrontSize"> XL
+                            </label>
+                        </div>
+                        <span class="onoffswitch-title-desc d-block mb-0">Change <strong>root</strong> font size to effect rem
+                                    values</span>
+                    </div>
+                    <hr class="mb-0 mt-4">
+                    <div class="mt-2 d-table w-100 pl-5 pr-3">
+                        <div class="fs-xs text-muted p-2 alert alert-warning mt-3 mb-2">
+                            <i class="fal fa-exclamation-triangle text-warning mr-2"></i>The settings below uses
+                            localStorage to load
+                            the external CSS file as an overlap to the base css. Due to network latency and CPU
+                            utilization, you may
+                            experience a brief flickering effect on page load which may show the intial applied theme
+                            for a split
+                            second. Setting the prefered style/theme in the header will prevent this from happening.
+                        </div>
+                    </div>
+                    <div class="mt-2 d-table w-100 pl-5 pr-3">
+                        <div class="d-table-cell align-middle">
+                            <h5 class="p-0">
+                                Theme colors
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="expanded theme-colors pl-5 pr-3">
+                        <ul class="m-0">
+
+                            <li>
+                                <a href="#" id="myapp-13" data-action="theme-update" data-themesave
+                                   data-theme="{% static 'css/themes/cust-theme-13.css' %}" data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="Emerald" data-original-title="Emerald"></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <hr class="mb-0 mt-4">
+                    <div class="pl-5 pr-3 py-3 bg-faded">
+                        <div class="row no-gutters">
+                            <div class="col-6 pr-1">
+                                <a href="#" class="btn btn-outline-danger fw-500 btn-block" data-action="app-reset">Reset
+                                    Settings</a>
+                            </div>
+                            <div class="col-6 pl-1">
+                                <a href="#" class="btn btn-danger fw-500 btn-block" data-action="factory-reset">Factory
+                                    Reset</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <span id="saving"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END Page Settings -->
+<!-- base vendor bundle:
+     DOC: if you remove pace.js from core please note on Internet Explorer some CSS animations may execute before a page is fully loaded, resulting 'jump' animations
+                + pace.js (recommended)
+                + jquery.js (core)
+                + jquery-ui-cust.js (core)
+                + popper.js (core)
+                + bootstrap.js (core)
+                + slimscroll.js (extension)
+                + app.navigation.js (core)
+                + ba-throttle-debounce.js (core)
+                + waves.js (extension)
+                + smartpanels.js (extension)
+                + src/../jquery-snippets.js (core) -->
+
+
+<div id="profilemodal" class="modal fade modal-fullscreen" tabindex="-1"
+     role="dialog"
+     style="display: none;"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Profile</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="panel-4" class="panel">
+                    <div class="panel-hdr bg-secondary-300 bg-success-gradient">
+                        <h2>
+                            <span class="fw-700"><i>Peronsal Information</i></span>
+                        </h2>
+                        <div class="panel-toolbar">
+                            <button class="btn btn-panel waves-effect waves-themed" data-action="panel-collapse"
+                                    data-toggle="tooltip" data-offset="0,10"
+                                    data-original-title="Collapse"></button>
+                        </div>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <div class="form-row">
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label" for="validationTooltip01">User ID</label>
+                                    <input type="text" class="form-control" id="profileid_id" disabled="true"
+                                           placeholder="First name" value="" required>
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label" for="validationTooltip01">First name <span
+                                            class="text-danger">*</span> </label>
+                                    <input type="text" class="form-control" id="firstname"
+                                           placeholder="First name" value="" required>
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label " for="validationTooltip02">Last name <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control " id="lastname"
+                                           placeholder="Last name" value="" required>
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label">Date of Birth <span
+                                            class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control " readonly="" value="1988-07-12"
+                                               id="bodpicker">
+                                        <div class="input-group-append">
+                                                            <span class="input-group-text fs-xl">
+                                                                <i class="fal fa-calendar-alt"></i>
+                                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label">Gender <span class="text-danger">*</span></label>
+                                    <select class="custom-select" id="gender" aria-label="usertype">
+                                        <option selected="">Gender</option>
+                                        <option value="1">Male</option>
+                                        <option value="2">Female</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label" for="validationTooltip03">Email </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="email"
+                                               data-inputmas="'alias':'email'"
+                                               placeholder="Email Required" aria-describedby="validationTooltip03"
+                                               required>
+                                        <div class="valid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="inputGroupPrepend2">@</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label" for="validationTooltip03">Contact No. </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="contact"
+                                               placeholder="Phone Number" aria-describedby="inputGroupPrepend3"
+                                               required>
+                                        <div class="valid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text fa-phone" id="inputGroupPrepend3"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label" for="validationTooltip03">Family Contact No. </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="famcontactno"
+                                               placeholder="Phone Number" aria-describedby="inputGroupPrepend4"
+                                               required>
+                                        <div class="valid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text fa-phone" id="inputGroupPrepend4"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 mb-2">
+                                    <label class="form-label" for="lookup_field">Home Address </label>
+                                    <div id="lookup_field" class="input-group ">
+                                        <input type="text" class="form-control col-md-3 " id="postcode_address"
+                                               placeholder="Postcode" aria-describedby="inputGroupPrepend3"
+                                               required>
+                                        <button id="findaddressbutton"
+                                                class="btn-sm btn-primary waves-effect waves-themed">Find my address
+                                        </button>
+                                        <div class="col-md-5" id="addressoutput">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="panel-5" class="panel">
+                    <div class="panel-hdr bg-primary-gradient bg-success-gradient">
+                        <h2>
+                            <span class="fw-700"><i>Care Service Information</i></span>
+                        </h2>
+                        <div class="panel-toolbar">
+                            <button class="btn btn-panel waves-effect waves-themed" data-action="panel-collapse"
+                                    data-toggle="tooltip" data-offset="0,10"
+                                    data-original-title="Collapse"></button>
+                        </div>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <div class="form-row">
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label" for="validationTooltip03">SOS No (1st)<span
+                                            class="text-danger">*</span> </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="sosno1"
+                                               placeholder="Phone Number" aria-describedby="careinfogroup1"
+                                               required>
+                                        <div class="valid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text fa-phone" id="careinfogroup1"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label" for="validationTooltip03">SOS No (2nd)<span
+                                            class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="sosno2"
+                                               placeholder="Phone Number" aria-describedby="careinfogroup2"
+                                               required>
+                                        <div class="valid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text fa-phone" id="careinfogroup2"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label" for="validationTooltip03">SOS No (3rd)<span
+                                            class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="sosno3"
+                                               placeholder="Phone Number" aria-describedby="careinfogroup3"
+                                               required>
+                                        <div class="valid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text fa-phone" id="careinfogroup3"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label" for="careinfogroup4">Safe Zone Center<span
+                                            class="text-danger">*</span> </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="fencecenter"
+                                               placeholder="Postcode" aria-describedby="careinfogroup4"
+                                               required>
+                                        <div class="valid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text fa-globe" id="careinfogroup4"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label" for="careinfogroup5">Safety Zone Radius Size<span
+                                            class="text-danger">*</span> </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="fenceradiussize"
+                                               placeholder="Miles" aria-describedby="careinfogroup5"
+                                               required>
+                                        <div class="valid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="careinfogroup5"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label"><span class="text-danger">See it on map*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <button id="showmapbutton"
+                                                class="btn-sm btn-primary waves-effect waves-themed" href="#mapmodal">
+                                            Show
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label">SOS Waiting Time (Minutes)<span
+                                            class="text-danger">*</span> </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="sosinterval"
+                                               placeholder="Wait ? minutes to call next SOS no.(type 0 to switch off)"
+                                               required>
+                                        <div class="valid-tooltip">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text fa-heart" id="careinfogroup7"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label" for="careinfogroup7">Life Data Upload Interval
+                                        (Minutes)<span
+                                                class="text-danger">*</span> </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="datainterval"
+                                               placeholder="Every ? minutes (type 0 to switch off)"
+                                               aria-describedby="careinfogroup7"
+                                               required>
+                                        <div class="valid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text fa-heart" id="careinfogroup7"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label" for="careinfogroup8">GPS Data Upload Interval
+                                        (Minutes)<span
+                                                class="text-danger">*</span> </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="gpsinterval"
+                                               placeholder="Every ? minutes (type 0 to switch off)"
+                                               aria-describedby="careinfogroup8"
+                                               required>
+                                        <div class="valid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text fa-heart" id="careinfogroup7"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label" for="careinfogroup8">Assign a Device<span
+                                            class="text-danger"></span> </label>
+                                    <div class="input-group">
+                                        <select class="custom-select" id="deviceselector" aria-label="usertype">
+                                            <option selected=""></option>
+                                        </select>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary waves-effect waves-themed" data-dismiss="modal">Close
+                </button>
+                <button type="button" class="btn btn-primary waves-effect waves-themed" id="saveprofile">Save
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="mapmodal" class="modal fade" tabindex="-1"
+         role="dialog"
+         style="display: none;"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-sm modal-dialog-centered" style="height: 50%;width:50%" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Safety Zone</h4>
+                    <button id="mapclosebutton" type="button" class="close" aria-label="Close">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body" id="map">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static  'js/vendors.bundle.js' %}"></script>
+<script src="{% static 'js/app.bundle.js' %}"></script>
+<script src="{% static 'js/unicare/utils.js' %}"></script>
+<script src="{% static 'js/datagrid/datatables/datatables.bundle.js' %}"></script>
+<script src="{% static 'js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js' %}"></script>
+<script type="text/javascript" src="https://js.ideal-postcodes.co.uk/postcodes-3.0.7.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8XJndAk1NtITTAfSZ26qOAGxHqacgUUU"></script>
+<script>
+    var controls = {
+        leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
+        rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
+    }
+
+    function initMap() {
+        var address = $("#fencecenter").val()
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 14
+        });
+        var geocoder = new google.maps.Geocoder();
+
+        geocoder.geocode({
+                'address': address
+            },
+            function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    var marker = new google.maps.Marker({
+                        position: results[0].geometry.location,
+                        map: map
+                    });
+                    google.maps.event.trigger(map, 'resize');
+                    map.setCenter(results[0].geometry.location);
+
+                    var circle = new google.maps.Circle({
+                        map: map,
+                        radius: 1609.34 * $("#fenceradiussize").val(),    // 10 miles in metres
+                        strokeOpacity: 0.8,
+                        strokeWeight: 1,
+                        fillOpacity: 0.25,
+                        fillColor: '#AA0000'
+                    });
+                    circle.bindTo('center', marker, 'position');
+                }
+            });
+    }
+
+
+    function populateModal(rowdata) {
+        $("#profileid_id").val(rowdata.profileid_id);
+        $("#firstname").val(rowdata.firstname);
+        $("#lastname").val(rowdata.lastname);
+        $("#gender option:selected").text = rowdata.gender;
+        $("#contact").val(rowdata.contactno);
+        $("#email").val(rowdata.email);
+        $("#postcode_address").val(rowdata.postcode);
+        $("#idpc_dropdown").remove();
+        $("#famcontactno").val(rowdata.famcontact);
+        $("#sosno1").val(rowdata.sosno1);
+        $("#sosno2").val(rowdata.sosno2);
+        $("#sosno3").val(rowdata.sosno3);
+        $("#fencecenter").val(rowdata.fencecenter);
+        $("#fenceradiussize").val(rowdata.fenceradiussize);
+        $("#sosinterval").val(rowdata.sosinterval);
+        $("#datainterval").val(rowdata.datainterval);
+        $("#gpsinterval").val(rowdata.gpsinterval);
+    }
+
+    function clearModal() {
+        $("#profileid_id").val("");
+        $("#firstname").val("");
+        $("#lastname").val("");
+        $("#gender option:selected").text = "";
+        $("#contact").val("");
+        $("#email").val("");
+        $("#postcode_address").val("");
+        $("#idpc_dropdown").remove();
+        $("#famcontactno").val("");
+        $("#deviceselector").val("");
+        $("#sosno1").val("");
+        $("#sosno2").val("");
+        $("#sosno3").val("");
+        $("#fencecenter").val("");
+        $("#fenceradiussize").val("");
+        $("#sosinterval").val("");
+        $("#datainterval").val("");
+        $("#gpsinterval").val("");
+    }
+
+    $(document).ready(function () {
+
+        $('#bodpicker').datepicker(
+            {
+                todayBtn: "linked",
+                clearBtn: true,
+                todayHighlight: true,
+                templates: controls,
+                format: "yyyy-mm-dd"
+            });
+
+
+        $('#lookup_field').setupPostcodeLookup({
+            api_key: 'ak_k3nfhahuRDdzvuVFwfKzjr5dn64Of',
+            output_fields: {
+                line_1: '#first_line',
+                line_2: '#second_line',
+                line_3: '#third_line',
+                post_town: '#post_town',
+                postcode: '#postcode'
+            },
+            input: '#postcode_address',
+            button: '#findaddressbutton',
+            dropdown_class: 'custom-select',
+            dropdown_container: '#addressoutput'
+        });
+
+
+        $("#showmapbutton").on("click", () => {
+
+            initMap()
+            $("#mapmodal").modal()
+
+        })
+
+
+        $("#mapclosebutton").on("click", () => {
+            $("#mapmodal").modal("hide")
+        })
+        var token = '{{csrf_token}}';
+
+
+        $("#saveprofile").on("click", () => {
+
+            var today = new Date();
+            var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+            today = new Date();
+            dob = new Date($("#bodpicker").val());
+            age = new Date(today - dob).getFullYear() - 1970;
+            newrow = {
+                "profileid_id": $("#profileid_id").val(),
+                "firstname": $("#firstname").val(),
+                "lastname": $("#lastname").val(),
+                "name": $("#firstname").val() + " " + $("#lastname").val(),
+                "gender": $("#gender option:selected").text(),
+                "dob": $("#bodpicker").val(),
+                "age": age,
+                "contactno": $("#contact").val(),
+                "email": $("#email").val(),
+                "postcode": $("#postcode_address").val(),
+                "address": $("#idpc_dropdown option:selected").text() + "," + $("#postcode_address").val(),
+                "famcontact": $("#famcontactno").val(),
+                "deviceid": $("#deviceselector").val(),
+                "orgid": '{{ orgid }}',
+                "sosno1": $("#sosno1").val(),
+                "sosno2": $("#sosno2").val(),
+                "sosno3": $("#sosno3").val(),
+                "fencecenter": $("#fencecenter").val(),
+                "fenceradiussize": $("#fenceradiussize").val(),
+                "sosinterval": $("#sosinterval").val(),
+                "datainterval": $("#datainterval").val(),
+                "gpsinterval": $("#gpsinterval").val(),
+            };
+
+            newrow.orgid = '{{ orgid }}'
+            var token = '{{csrf_token}}';
+            $.ajax({
+                type: "POST",
+                headers: {"X-CSRFToken": token},
+                url: "{% url 'service:profile' %}",
+                data: newrow,
+                dataType: 'json',
+                success: function (result) {
+                    if (result.status == "success") {
+                        var table = $('#profiletable').DataTable();
+                        var indexes = table
+                            .rows()
+                            .indexes()
+                            .filter(function (value, index) {
+                                return $("#profileid_id").val() === table.row(value).data().profileid_id;
+                            });
+                        table.row(indexes).remove();
+                        table.row.add(newrow).draw()
+                        $("#profilemodal").modal("hide");
+                    } else {
+
+                    }
+                }
+            });
+
+
+        })
+
+        // Column Definitions
+        var columnSet = [
+            {
+                title: "profileid",
+                id: "profileid_id",
+                data: "profileid_id",
+                placeholderMsg: "Server Generated ID",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "FirstName",
+                id: "firstname",
+                data: "firstname",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "LastName",
+                id: "lastname",
+                data: "lastname",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "Name",
+                id: "name",
+                data: "name",
+                type: "text"
+            },
+            {
+                title: "Gender",
+                id: "gender",
+                data: "gender",
+                type: "text"
+            },
+            {
+                title: "DoB",
+                id: "dob",
+                data: "dob",
+                "visible": false,
+                "searchable": false,
+                type: 'date'
+            },
+            {
+                title: "Age",
+                id: "age",
+                data: "age",
+                type: "text"
+            },
+            {
+                title: "Contact",
+                id: "contactno",
+                data: "contactno",
+                type: "text"
+            },
+            {
+                title: "Email",
+                id: "email",
+                data: "email",
+                type: "text",
+            },
+            {
+                title: "Postcode",
+                id: "postcode",
+                data: "postcode",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "Home Address",
+                id: "address",
+                data: "address",
+                type: "text",
+            },
+            {
+                title: "Family Contact",
+                id: "famcontact",
+                data: "famcontact",
+                type: "text",
+            },
+            {
+                title: "Assigned Device",
+                id: "deviceid",
+                data: "deviceid",
+                type: "text",
+            },
+            {
+                title: "Orgid",
+                id: "orgid",
+                data: "orgid",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "SOSNO1",
+                id: "sosno1",
+                data: "sosno1",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "SOSNO2",
+                id: "sosno2",
+                data: "sosno2",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "SOSNO3",
+                id: "sosno3",
+                data: "sosno3",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "VFencecenter",
+                id: "fencecenter",
+                data: "fencecenter",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "RadiusSize",
+                id: "fenceradiussize",
+                data: "fenceradiussize",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "SosInterval",
+                id: "sosinterval",
+                data: "sosinterval",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "datainterval",
+                id: "datainterval",
+                data: "datainterval",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "gpsinterval",
+                id: "gpsinterval",
+                data: "gpsinterval",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+        ]
+
+        /* start data table */
+        var myTable = $('#profiletable').dataTable(
+            {
+                /* check datatable buttons page for more info on how this DOM structure works */
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                ajax: {
+                    "headers": {"X-CSRFToken": token},
+                    "url": "{% url 'service:profile' %}?orgid={{ orgid }}",
+                    "type": "GET"
+                },
+                columns: columnSet,
+                lengthMenu: [10, 20, 50, 100],
+                lengthChange: true,
+                /* selecting multiple rows will not work */
+                select: 'single',
+                /* altEditor at work */
+                altEditor: false,
+                responsive: true,
+                /* buttons uses classes from bootstrap, see buttons page for more details */
+                buttons: [
+
+                     {
+                        text: '<i class="fal fa-plus mr-1"></i> Add',
+                        name: 'add',
+                        className: 'btn-success btn-sm btn-pills mr-1',
+                        action: function (e, dt, node, config) {
+                            clearModal();
+                            $("#profileid_id").val(create_UUID);
+                            $('#deviceselector').empty();
+                            $('#deviceselector').append($('<option></option>'));
+                            $.ajax({
+                                "headers": {"X-CSRFToken": token},
+                                "url": "{% url 'service:device' %}?orgid={{ orgid }}",
+                                "type": "GET",
+                                success: function (result) {
+                                    for (let device of result.data) {
+                                        if (device.status == "Available") {
+
+                                            $('#deviceselector').append($('<option></option>').val(device.id).html(device.id));
+                                        }
+                                    }
+                                }
+                            });
+
+                            $("#profilemodal").modal();
+                        }
+                    },
+                    {
+                        extend: 'selected',
+                        text: '<i class="fal fa-edit mr-1"></i> Edit',
+                        name: 'edit',
+                        className: 'btn-primary btn-sm btn-pills mr-1',
+                        action: function (e, dt, node, config) {
+                            rowdata = dt.rows('.selected').data()[0];
+                            populateModal(rowdata);
+                            $('#deviceselector').empty();
+                            $('#deviceselector').append($('<option></option>'));
+                            $('#deviceselector').append($('<option></option>').val(rowdata.deviceid).html(rowdata.deviceid));
+                            $('#deviceselector').val(rowdata.deviceid)
+                            $.ajax({
+                                "headers": {"X-CSRFToken": token},
+                                "url": "{% url 'service:device' %}?orgid={{ orgid }}",
+                                "type": "GET",
+                                success: function (result) {
+                                    for (let device of result.data) {
+                                        if (device.status == "Available") {
+
+
+                                            $('#deviceselector').append($('<option></option>').val(device.id).html(device.id));
+                                        }
+                                    }
+                                }
+                            });
+                            $("#profilemodal").modal();
+                            return false;
+                        }
+                    },
+                      {
+                        extend: 'selected',
+                        text: '<i class="fal fa-times mr-1"></i> Delete',
+                        name: 'delete',
+                        className: 'btn-primary btn-sm btn-pills mr-1'
+                    },
+
+                    {#{#}
+                    {#    text: '<i class="fal fa-sync mr-1"></i> Refresh',#}
+                    {#    name: 'refresh',#}
+                    {#    className: 'btn-primary btn-sm btn-pills'#}
+                    {#}#}
+                    ],
+
+
+                /* default callback for insertion: mock webservice, always success */
+                onAddRow: function (dt, rowdata, success, error) {
+                    console.log("Missing AJAX configuration for INSERT");
+                    success(rowdata);
+
+
+                },
+                onEditRow: function (dt, rowdata, success, error) {
+                    console.log("Missing AJAX configuration for UPDATE");
+                    success(rowdata);
+
+                },
+                onDeleteRow: function (dt, rowdata, success, error) {
+                    console.log("Missing AJAX configuration for DELETE");
+                    success(rowdata);
+
+                },
+            });
+
+
+    });
+
+
+</script>
+<!--<script src="js/../script.js"></script>
+<script>
+$(document).ready(function () {
+
+});
+</script>-->
+</body>
+</html>

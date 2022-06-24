@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>
+        Unicare - admin - UnicareAdmin
+    </title>
+    <meta name="description" content="Page Titile">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, minimal-ui">
+    <!-- Call App Mode on ios devices -->
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <!-- Remove Tap Highlight on Windows Phone IE -->
+    <meta name="msapplication-tap-highlight" content="no">
+    <!-- base css -->
+    <link rel="stylesheet" media="screen, print" href="{% static  'css/vendors.bundle.css' %}">
+    <link rel="stylesheet" media="screen, print" href="{% static 'css/app.bundle.css' %}">
+    <!-- Place favicon.ico in the root directory -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/favicon/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon/favicon-32x32.png' %}">
+    <link rel="mask-icon" href="{% static 'img/favicon/safari-pinned-tab.svg' %}" color="#5bbad5">
+    <link rel="stylesheet" media="screen, print" href="{% static 'css/datagrid/datatables/datatables.bundle.css' %}">
+    <link rel="stylesheet" media="screen, print" href="{% static 'css/vendors.bundle.css' %}">
+    <link rel="stylesheet" media="screen, print" href="{% static 'css/theme-demo.css' %}">
+    <link rel="stylesheet" media="screen, print" href="{% static 'css/statistics/chartjs/chartjs.css' %}">
+    <link rel="stylesheet" media="screen, print"
+          href="{% static 'css/formplugins/bootstrap-datepicker/bootstrap-datepicker.css' %}">
+
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Open+Sans:600,300);
+
+        .center {
+            position: relative;
+            top: 10px;
+            margin: 5px 5px auto auto;
+            height: 250px;
+            width: 250px;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            background: #fff;
+            border-radius: 3px;
+            overflow: hidden;
+            box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .profile {
+            float: left;
+            width: 200px;
+
+            text-align: center;
+        }
+
+        .profile .image {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            margin: 20px auto 0 auto;
+        }
+
+        .profile .image .circle-1, .profile .image .circle-2 {
+            position: absolute;
+            box-sizing: border-box;
+            width: 76px;
+            height: 76px;
+            top: -3px;
+            left: -3px;
+            border-width: 1px;
+            border-style: solid;
+            border-color: #786450 #786450 #786450 transparent;
+            border-radius: 50%;
+            transition: all 1.5s ease-in-out;
+        }
+
+        .profile .image .circle-2 {
+            width: 82px;
+            height: 82px;
+            top: -6px;
+            left: -6px;
+            border-color: #786450 transparent #786450 #786450;
+        }
+
+        .profile .image img {
+            display: block;
+            border-radius: 50%;
+            background: #F5E8DF;
+        }
+
+        .profile .image:hover {
+            cursor: pointer;
+        }
+
+        .profile .image:hover .circle-1, .profile .image:hover .circle-2 {
+            -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+        }
+
+        .profile .image:hover .circle-2 {
+            -webkit-transform: rotate(-360deg);
+            transform: rotate(-360deg);
+        }
+
+        .profile .name {
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .profile .job {
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 15px;
+        }
+
+        .profile .actions {
+            margin-top: 10px;
+        }
+
+        .profile .actions .btn {
+            display: block;
+            width: 50px;
+            height: 30px;
+            margin: 0 auto 10px auto;
+            background: none;
+            border: 1px solid #786450;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            box-sizing: border-box;
+            transition: all .3s ease-in-out;
+            color: #786450;
+        }
+
+        .profile .actions .btn:hover {
+            background: #786450;
+            color: #fff;
+        }
+
+        .stats {
+            float: left;
+        }
+
+        #map {
+            height: 400px; /* The height is 400 pixels */
+            width: 100%; /* The width is the width of the web page */
+        }
+
+        .stats .box {
+            box-sizing: border-box;
+            width: 80px;
+            height: 64px;
+            background: #63C8F2;
+            text-align: center;
+            padding-top: 5px;
+            margin-bottom: 1px;
+            transition: all .4s ease-in-out;
+        }
+
+        .stats .box:hover {
+            background: #39bfb1;
+            cursor: pointer;
+        }
+
+        .stats .box:nth-child(2) {
+            margin: 1px 0;
+        }
+
+        .stats span {
+            display: block;
+        }
+
+        .stats .value {
+            font-size: 18px;
+            font-weight: 400;
+            color: #fffffd;
+        }
+
+        .stats .parameter {
+            font-size: 11px;
+        }
+
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+    <!--<link rel="stylesheet" media="screen, print" href="css/your_styles.css">-->
+</head>
+<body class="mod-bg-1 ">
+<!-- DOC: script to save and load page settings -->
+<script>
+    /**
+     *    This script should be placed right after the body tag for fast execution
+     *    Note: the script is written in pure javascript and does not depend on thirdparty library
+     **/
+    'use strict';
+
+    var classHolder = document.getElementsByTagName("BODY")[0],
+        /**
+         * Load from localstorage
+         **/
+
+        themeSettings = (localStorage.getItem('themeSettings')) ? JSON.parse(localStorage.getItem('themeSettings')) :
+            {},
+        themeURL = themeSettings.themeURL || '',
+        themeOptions = themeSettings.themeOptions || '';
+    /**
+     * Load theme options
+     **/
+    if (themeSettings.themeOptions) {
+        classHolder.className = themeSettings.themeOptions;
+        console.log("%c✔ Theme settings loaded", "color: #148f32");
+    } else {
+        console.log("Heads up! Theme settings is empty or does not exist, loading default settings...");
+    }
+    if (themeSettings.themeURL && !document.getElementById('mytheme')) {
+        var cssfile = document.createElement('link');
+        cssfile.id = 'mytheme';
+        cssfile.rel = 'stylesheet';
+        cssfile.href = themeURL;
+        document.getElementsByTagName('head')[0].appendChild(cssfile);
+    }
+    /**
+     * Save to localstorage
+     **/
+    var saveSettings = function () {
+        themeSettings.themeOptions = String(classHolder.className).split(/[^\w-]+/).filter(function (item) {
+            return /^(nav|header|mod|display)-/i.test(item);
+        }).join(' ');
+        if (document.getElementById('mytheme')) {
+            themeSettings.themeURL = document.getElementById('mytheme').getAttribute("href");
+        }
+        ;
+        localStorage.setItem('themeSettings', JSON.stringify(themeSettings));
+    }
+    /**
+     * Reset settings
+     **/
+    var resetSettings = function () {
+        localStorage.setItem("themeSettings", "");
+    }
+
+</script>
+<!-- BEGIN Page Wrapper -->
+<div class="page-wrapper">
+    <div class="page-inner">
+        <!-- BEGIN Left Aside -->
+        <aside class="page-sidebar">
+            <div class="page-logo">
+
+                <img src="{% static 'img/logo.png' %}" alt="SmartAdmin WebApp" aria-roledescription="logo">
+                <span class="page-logo-text mr-1">UnicareAdmin Panel</span>
+                <span class="position-absolute text-white opacity-50 small pos-top pos-right mr-2 mt-n2"></span>
+                <i class="fal fa-angle-down d-inline-block ml-1 fs-lg color-primary-300"></i>
+            </div>
+            <!-- BEGIN PRIMARY NAVIGATION -->
+            <nav id="js-primary-nav" class="primary-nav" role="navigation">
+                <div class="nav-filter">
+                    <div class="position-relative">
+                        <input type="text" id="nav_filter_input" placeholder="Filter menu" class="form-control"
+                               tabindex="0">
+                        <a href="#" onclick="return false;" class="btn-primary btn-search-close js-waves-off"
+                           data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar">
+                            <i class="fal fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <img src="{% static 'img/demo/avatars/avatar-m.png' %}" class="profile-image rounded-circle"
+                         alt="{{ user.get_full_name }}">
+                    <div class="info-card-text">
+                        <a href="#" class="d-flex align-items-center text-white">
+                                    <span class="text-truncate text-truncate-sm d-inline-block">
+                                       {{ user.get_full_name }}
+                                    </span>
+                        </a>
+                        <span class="d-inline-block text-truncate text-truncate-sm">{{ user.email }}</span>
+                    </div>
+                    <img src="{% static 'img/card-backgrounds/cover-2-lg.png' %}" class="cover" alt="cover">
+                    <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle"
+                       data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                        <i class="fal fa-angle-down"></i>
+                    </a>
+                </div>
+                <ul id="js-nav-menu" class="nav-menu">
+                    <li>
+                        <a href="{% url 'portal:dashboard' %}" title="Monitoring Dashboard"
+                           data-filter-tags="Monitoring Dashboard">
+                            <i class="fal fa-chart-bar"></i>
+                            <span class="nav-link-text" data-i18n="nav.application_intel">Monitoring Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'portal:profiles' %}" title="Manage Profiles"
+                           data-filter-tags="Manage Profiles">
+                            <i class="fal fa-users"></i>
+                            <span class="nav-link-text" data-i18n="nav.application_intel">Manage Profiles</span>
+                        </a>
+
+                    </li>
+                    <li>
+                        <a href="#" title="Manage Carers" data-filter-tags="Manage Carers">
+                            <i class="fal fa-user-md"></i>
+                            <span class="nav-link-text" data-i18n="nav.theme_settings">Manage Carers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'portal:devices' %}" title="Manage Devices" data-filter-tags="Manage Devices">
+                            <i class="fal fa-watch"></i>
+                            <span class="nav-link-text" data-i18n="nav.theme_settings">Manage Devices</span>
+                        </a>
+                    </li>
+
+                </ul>
+                <div class="filter-message js-filter-message bg-success-600"></div>
+            </nav>
+            <!-- END PRIMARY NAVIGATION -->
+            <!-- NAV FOOTER -->
+
+        </aside>
+        <!-- END Left Aside -->
+        <div class="page-content-wrapper">
+            <!-- BEGIN Page Header -->
+            <header class="page-header" role="banner">
+                <!-- we need this logo when user switches to nav-function-top -->
+                <div class="page-logo">
+                    <a href="#" class="page-logo-link press-scale-down d-flex align-items-center position-relative"
+                       data-toggle="modal" data-target="#modal-shortcut">
+                        <img src="{% static 'img/logo.png' %}" alt="SmartAdmin WebApp" aria-roledescription="logo">
+                        <span class="page-logo-text mr-1">UnicareAdmin WebApp</span>
+                        <span class="position-absolute text-white opacity-50 small pos-top pos-right mr-2 mt-n2"></span>
+                        <i class="fal fa-angle-down d-inline-block ml-1 fs-lg color-primary-300"></i>
+                    </a>
+                </div>
+                <!-- DOC: nav menu layout change shortcut -->
+                <div class="hidden-md-down dropdown-icon-menu position-relative">
+                    <a href="#" class="header-btn btn js-waves-off" data-action="toggle"
+                       data-class="nav-function-hidden" title="Hide Navigation">
+                        <i class="ni ni-menu"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="#" class="btn js-waves-off" data-action="toggle" data-class="nav-function-minify"
+                               title="Minify Navigation">
+                                <i class="ni ni-minify-nav"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="btn js-waves-off" data-action="toggle" data-class="nav-function-fixed"
+                               title="Lock Navigation">
+                                <i class="ni ni-lock-nav"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- DOC: mobile button appears during mobile width -->
+                <div class="hidden-lg-up">
+                    <a href="#" class="header-btn btn press-scale-down" data-action="toggle" data-class="mobile-nav-on">
+                        <i class="ni ni-menu"></i>
+                    </a>
+                </div>
+                <div class="search">
+                    <form class="app-forms hidden-xs-down" role="search" action="page_search.html" autocomplete="off">
+                        <input type="text" id="search-field" placeholder="Search for anything" class="form-control"
+                               tabindex="1">
+                        <a href="#" onclick="return false;" class="btn-danger btn-search-close js-waves-off d-none"
+                           data-action="toggle" data-class="mobile-search-on">
+                            <i class="fal fa-times"></i>
+                        </a>
+                    </form>
+                </div>
+                <div class="ml-auto d-flex">
+                    <!-- activate app search icon (mobile) -->
+                    <div class="hidden-sm-up">
+                        <a href="#" class="header-icon" data-action="toggle" data-class="mobile-search-on"
+                           data-focus="search-field" title="Search">
+                            <i class="fal fa-search"></i>
+                        </a>
+                    </div>
+                    <!-- app settings -->
+                    <div class="hidden-md-down">
+                        <a href="#" class="header-icon" data-toggle="modal" data-target=".js-modal-settings">
+                            <i class="fal fa-cog"></i>
+                        </a>
+                    </div>
+
+
+                    <!-- app notification -->
+                    <div>
+                        <a href="#" class="header-icon" data-toggle="dropdown" title="You got 11 notifications">
+                            <i class="fal fa-bell"></i>
+                            <span class="badge badge-icon">0</span>
+                        </a>
+
+
+                    </div>
+                    <!-- app user menu -->
+                    <div>
+                        <a href="#" data-toggle="dropdown" title="drlantern@gotbootstrap.com"
+                           class="header-icon d-flex align-items-center justify-content-center ml-2">
+                            <img src="{% static 'img/demo/avatars/avatar-m.png' %}"
+                                 class="profile-image rounded-circle" alt="{{ user.get_full_name }}">
+                            <!-- you can also add username next to the avatar with the codes below:
+                            <span class="ml-1 mr-1 text-truncate text-truncate-header hidden-xs-down">Me</span>
+                            <i class="ni ni-chevron-down hidden-xs-down"></i> -->
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-animated dropdown-lg">
+                            <div class="dropdown-header bg-trans-gradient d-flex flex-row py-4 rounded-top">
+                                <div class="d-flex flex-row align-items-center mt-1 mb-1 color-white">
+                                            <span class="mr-2">
+                                                <img src="{% static 'img/demo/avatars/avatar-m.png' %}"
+                                                     class="rounded-circle profile-image"
+                                                     alt="{{ user.get_full_name }}">
+                                            </span>
+                                    <div class="info-card-text">
+                                        <div class="fs-lg text-truncate text-truncate-lg">{{ user.get_full_name }}</div>
+                                        <span class="text-truncate text-truncate-sm opacity-80">{{ user.last_login }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider m-0"></div>
+                            <a href="#" class="dropdown-item" data-toggle="modal" data-target=".js-modal-settings">
+                                <span data-i18n="drpdwn.settings">Settings</span>
+                            </a>
+                            <div class="dropdown-divider m-0"></div>
+                            <div class="dropdown-multilevel dropdown-multilevel-left">
+                                <div class="dropdown-item">
+                                    Language
+                                </div>
+                                <div class="dropdown-menu">
+                                    <a href="#?lang=fr" class="dropdown-item" data-action="lang"
+                                       data-lang="fr">Français</a>
+                                    <a href="#?lang=en" class="dropdown-item active" data-action="lang" data-lang="en">English
+                                        (US)</a>
+                                    <a href="#?lang=es" class="dropdown-item" data-action="lang"
+                                       data-lang="es">Español</a>
+                                    <a href="#?lang=ru" class="dropdown-item" data-action="lang" data-lang="ru">Русский
+                                        язык</a>
+                                    <a href="#?lang=jp" class="dropdown-item" data-action="lang" data-lang="jp">日本語</a>
+                                    <a href="#?lang=ch" class="dropdown-item" data-action="lang" data-lang="ch">中文</a>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider m-0"></div>
+                            <a class="dropdown-item fw-500 pt-3 pb-3" href="page_login_alt.html">
+                                <span data-i18n="drpdwn.page-logout">My Profile</span>
+                            </a>
+                            <div class="dropdown-divider m-0"></div>
+                            <a id="logoutbuntton" class="dropdown-item fw-500 pt-3 pb-3"
+                               href="{% url 'service:adminsignout' %}">
+                                <span data-i18n="drpdwn.page-logout">Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- END Page Header -->
+            <!-- BEGIN Page Content -->
+            <!-- the #js-page-content id is needed for some plugins to initialize -->
+            <main id="js-page-content" role="main" class="page-content">
+                <ol class="breadcrumb page-breadcrumb">
+                    <li class="position-absolute pos-top pos-right d-none d-sm-block"><span class="js-get-date"></span>
+                    </li>
+                </ol>
+                <div class="subheader">
+                    <h1 class="subheader-title">
+                        <i class='subheader-icon fal fa-chart-bar'></i> Monitoring Dashboard
+                        <small>
+                            Latest Status of Elderly
+                        </small>
+                    </h1>
+                </div>
+
+
+                <div id="carddeck" class="card-deck">
+
+                </div>
+
+            </main>
+            <!-- this overlay is activated only when mobile menu is triggered -->
+            <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+            <!-- END Page Content -->
+            <!-- BEGIN Page Footer -->
+            <footer class="page-footer" role="contentinfo">
+                <div class="d-flex align-items-center flex-1 text-muted">
+                    <span class="hidden-md-down fw-700">2022 © Unicare, CfACS, MMU </span>
+                </div>
+                <div>
+                    <ul class="list-table m-0">
+                        <li><a href="intel_introduction.html" class="text-secondary fw-700">About</a></li>
+                        <li class="pl-3"><a href="info_app_licensing.html" class="text-secondary fw-700">License</a>
+                        </li>
+
+                    </ul>
+                </div>
+            </footer>
+            <!-- END Page Footer -->
+            <!-- BEGIN Shortcuts -->
+
+            <!-- END Shortcuts -->
+            <!-- BEGIN Color profile -->
+            <!-- this area is hidden and will not be seen on screens or screen readers -->
+            <!-- we use this only for CSS color refernce for JS stuff -->
+            <p id="js-color-profile" class="d-none">
+                <span class="color-primary-50"></span>
+                <span class="color-primary-100"></span>
+                <span class="color-primary-200"></span>
+                <span class="color-primary-300"></span>
+                <span class="color-primary-400"></span>
+                <span class="color-primary-500"></span>
+                <span class="color-primary-600"></span>
+                <span class="color-primary-700"></span>
+                <span class="color-primary-800"></span>
+                <span class="color-primary-900"></span>
+                <span class="color-info-50"></span>
+                <span class="color-info-100"></span>
+                <span class="color-info-200"></span>
+                <span class="color-info-300"></span>
+                <span class="color-info-400"></span>
+                <span class="color-info-500"></span>
+                <span class="color-info-600"></span>
+                <span class="color-info-700"></span>
+                <span class="color-info-800"></span>
+                <span class="color-info-900"></span>
+                <span class="color-danger-50"></span>
+                <span class="color-danger-100"></span>
+                <span class="color-danger-200"></span>
+                <span class="color-danger-300"></span>
+                <span class="color-danger-400"></span>
+                <span class="color-danger-500"></span>
+                <span class="color-danger-600"></span>
+                <span class="color-danger-700"></span>
+                <span class="color-danger-800"></span>
+                <span class="color-danger-900"></span>
+                <span class="color-warning-50"></span>
+                <span class="color-warning-100"></span>
+                <span class="color-warning-200"></span>
+                <span class="color-warning-300"></span>
+                <span class="color-warning-400"></span>
+                <span class="color-warning-500"></span>
+                <span class="color-warning-600"></span>
+                <span class="color-warning-700"></span>
+                <span class="color-warning-800"></span>
+                <span class="color-warning-900"></span>
+                <span class="color-success-50"></span>
+                <span class="color-success-100"></span>
+                <span class="color-success-200"></span>
+                <span class="color-success-300"></span>
+                <span class="color-success-400"></span>
+                <span class="color-success-500"></span>
+                <span class="color-success-600"></span>
+                <span class="color-success-700"></span>
+                <span class="color-success-800"></span>
+                <span class="color-success-900"></span>
+                <span class="color-fusion-50"></span>
+                <span class="color-fusion-100"></span>
+                <span class="color-fusion-200"></span>
+                <span class="color-fusion-300"></span>
+                <span class="color-fusion-400"></span>
+                <span class="color-fusion-500"></span>
+                <span class="color-fusion-600"></span>
+                <span class="color-fusion-700"></span>
+                <span class="color-fusion-800"></span>
+                <span class="color-fusion-900"></span>
+            </p>
+            <!-- END Color profile -->
+        </div>
+    </div>
+</div>
+
+<!-- END Messenger -->
+<!-- BEGIN Page Settings -->
+<div class="modal fade js-modal-settings modal-backdrop-transparent" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-right modal-md">
+        <div class="modal-content">
+            <div class="dropdown-header bg-trans-gradient d-flex justify-content-center align-items-center w-100">
+                <h4 class="m-0 text-center color-white">
+                    Layout Settings
+                    <small class="mb-0 opacity-80">User Interface Settings</small>
+                </h4>
+                <button type="button" class="close text-white position-absolute pos-top pos-right p-2 m-1 mr-2"
+                        data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="settings-panel">
+                    <div class="mt-4 d-table w-100 px-5">
+                        <div class="d-table-cell align-middle">
+                            <h5 class="p-0">
+                                App Layout
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="list" id="fh">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="header-function-fixed"></a>
+                        <span class="onoffswitch-title">Fixed Header</span>
+                        <span class="onoffswitch-title-desc">header is in a fixed at all times</span>
+                    </div>
+                    <div class="list" id="nff">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-function-fixed"></a>
+                        <span class="onoffswitch-title">Fixed Navigation</span>
+                        <span class="onoffswitch-title-desc">left panel is fixed</span>
+                    </div>
+                    <div class="list" id="nfm">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-function-minify"></a>
+                        <span class="onoffswitch-title">Minify Navigation</span>
+                        <span class="onoffswitch-title-desc">Skew nav to maximize space</span>
+                    </div>
+                    <div class="list" id="nfh">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-function-hidden"></a>
+                        <span class="onoffswitch-title">Hide Navigation</span>
+                        <span class="onoffswitch-title-desc">roll mouse on edge to reveal</span>
+                    </div>
+                    <div class="list" id="nft">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-function-top"></a>
+                        <span class="onoffswitch-title">Top Navigation</span>
+                        <span class="onoffswitch-title-desc">Relocate left pane to top</span>
+                    </div>
+                    <div class="list" id="mmb">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-main-boxed"></a>
+                        <span class="onoffswitch-title">Boxed Layout</span>
+                        <span class="onoffswitch-title-desc">Encapsulates to a container</span>
+                    </div>
+                    <div class="expanded">
+                        <ul class="">
+                            <li>
+                                <div class="bg-fusion-50" data-action="toggle" data-class="mod-bg-1"></div>
+                            </li>
+                            <li>
+                                <div class="bg-warning-200" data-action="toggle" data-class="mod-bg-2"></div>
+                            </li>
+                            <li>
+                                <div class="bg-primary-200" data-action="toggle" data-class="mod-bg-3"></div>
+                            </li>
+                            <li>
+                                <div class="bg-success-300" data-action="toggle" data-class="mod-bg-4"></div>
+                            </li>
+                        </ul>
+                        <div class="list" id="mbgf">
+                            <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                               data-class="mod-fixed-bg"></a>
+                            <span class="onoffswitch-title">Fixed Background</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-table w-100 px-5">
+                        <div class="d-table-cell align-middle">
+                            <h5 class="p-0">
+                                Mobile Menu
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="list" id="nmp">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-mobile-push"></a>
+                        <span class="onoffswitch-title">Push Content</span>
+                        <span class="onoffswitch-title-desc">Content pushed on menu reveal</span>
+                    </div>
+                    <div class="list" id="nmno">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-mobile-no-overlay"></a>
+                        <span class="onoffswitch-title">No Overlay</span>
+                        <span class="onoffswitch-title-desc">Removes mesh on menu reveal</span>
+                    </div>
+                    <div class="list" id="sldo">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="nav-mobile-slide-out"></a>
+                        <span class="onoffswitch-title">Off-Canvas <sup>(beta)</sup></span>
+                        <span class="onoffswitch-title-desc">Content overlaps menu</span>
+                    </div>
+                    <div class="mt-4 d-table w-100 px-5">
+                        <div class="d-table-cell align-middle">
+                            <h5 class="p-0">
+                                Accessibility
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="list" id="mbf">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-bigger-font"></a>
+                        <span class="onoffswitch-title">Bigger Content Font</span>
+                        <span class="onoffswitch-title-desc">content fonts are bigger for readability</span>
+                    </div>
+                    <div class="list" id="mhc">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-high-contrast"></a>
+                        <span class="onoffswitch-title">High Contrast Text (WCAG 2 AA)</span>
+                        <span class="onoffswitch-title-desc">4.5:1 text contrast ratio</span>
+                    </div>
+                    <div class="list" id="mcb">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-color-blind"></a>
+                        <span class="onoffswitch-title">Daltonism <sup>(beta)</sup> </span>
+                        <span class="onoffswitch-title-desc">color vision deficiency</span>
+                    </div>
+                    <div class="list" id="mpc">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-pace-custom"></a>
+                        <span class="onoffswitch-title">Preloader Inside</span>
+                        <span class="onoffswitch-title-desc">preloader will be inside content</span>
+                    </div>
+                    <div class="mt-4 d-table w-100 px-5">
+                        <div class="d-table-cell align-middle">
+                            <h5 class="p-0">
+                                Global Modifications
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="list" id="mcbg">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-clean-page-bg"></a>
+                        <span class="onoffswitch-title">Clean Page Background</span>
+                        <span class="onoffswitch-title-desc">adds more whitespace</span>
+                    </div>
+                    <div class="list" id="mhni">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-hide-nav-icons"></a>
+                        <span class="onoffswitch-title">Hide Navigation Icons</span>
+                        <span class="onoffswitch-title-desc">invisible navigation icons</span>
+                    </div>
+                    <div class="list" id="dan">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-disable-animation"></a>
+                        <span class="onoffswitch-title">Disable CSS Animation</span>
+                        <span class="onoffswitch-title-desc">Disables CSS based animations</span>
+                    </div>
+                    <div class="list" id="mhic">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-hide-info-card"></a>
+                        <span class="onoffswitch-title">Hide Info Card</span>
+                        <span class="onoffswitch-title-desc">Hides info card from left panel</span>
+                    </div>
+                    <div class="list" id="mlph">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-lean-subheader"></a>
+                        <span class="onoffswitch-title">Lean Subheader</span>
+                        <span class="onoffswitch-title-desc">distinguished page header</span>
+                    </div>
+                    <div class="list" id="mnl">
+                        <a href="#" onclick="return false;" class="btn btn-switch" data-action="toggle"
+                           data-class="mod-nav-link"></a>
+                        <span class="onoffswitch-title">Hierarchical Navigation</span>
+                        <span class="onoffswitch-title-desc">Clear breakdown of nav links</span>
+                    </div>
+                    <div class="list mt-1">
+                        <span class="onoffswitch-title">Global Font Size <small>(RESETS ON REFRESH)</small> </span>
+                        <div class="btn-group btn-group-sm btn-group-toggle my-2" data-toggle="buttons">
+                            <label class="btn btn-default btn-sm" data-action="toggle-swap" data-class="root-text-sm"
+                                   data-target="html">
+                                <input type="radio" name="changeFrontSize"> SM
+                            </label>
+                            <label class="btn btn-default btn-sm" data-action="toggle-swap" data-class="root-text"
+                                   data-target="html">
+                                <input type="radio" name="changeFrontSize" checked=""> MD
+                            </label>
+                            <label class="btn btn-default btn-sm" data-action="toggle-swap" data-class="root-text-lg"
+                                   data-target="html">
+                                <input type="radio" name="changeFrontSize"> LG
+                            </label>
+                            <label class="btn btn-default btn-sm" data-action="toggle-swap" data-class="root-text-xl"
+                                   data-target="html">
+                                <input type="radio" name="changeFrontSize"> XL
+                            </label>
+                        </div>
+                        <span class="onoffswitch-title-desc d-block mb-0">Change <strong>root</strong> font size to effect rem
+                                    values</span>
+                    </div>
+                    <hr class="mb-0 mt-4">
+                    <div class="mt-2 d-table w-100 pl-5 pr-3">
+                        <div class="fs-xs text-muted p-2 alert alert-warning mt-3 mb-2">
+                            <i class="fal fa-exclamation-triangle text-warning mr-2"></i>The settings below uses
+                            localStorage to load
+                            the external CSS file as an overlap to the base css. Due to network latency and CPU
+                            utilization, you may
+                            experience a brief flickering effect on page load which may show the intial applied theme
+                            for a split
+                            second. Setting the prefered style/theme in the header will prevent this from happening.
+                        </div>
+                    </div>
+                    <div class="mt-2 d-table w-100 pl-5 pr-3">
+                        <div class="d-table-cell align-middle">
+                            <h5 class="p-0">
+                                Theme colors
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="expanded theme-colors pl-5 pr-3">
+                        <ul class="m-0">
+
+                            <li>
+                                <a href="#" id="myapp-13" data-action="theme-update" data-themesave
+                                   data-theme="{% static 'css/themes/cust-theme-13.css' %}" data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="Emerald" data-original-title="Emerald"></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <hr class="mb-0 mt-4">
+                    <div class="pl-5 pr-3 py-3 bg-faded">
+                        <div class="row no-gutters">
+                            <div class="col-6 pr-1">
+                                <a href="#" class="btn btn-outline-danger fw-500 btn-block" data-action="app-reset">Reset
+                                    Settings</a>
+                            </div>
+                            <div class="col-6 pl-1">
+                                <a href="#" class="btn btn-danger fw-500 btn-block" data-action="factory-reset">Factory
+                                    Reset</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <span id="saving"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mapmodal" class="modal fade" tabindex="-1"
+     role="dialog"
+     style="display: none;"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="maptitle">I was here at</h4>
+                <button id="mapclosebutton" type="button" class="close" aria-label="Close">
+                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body modal-lg" id="map">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="chartmodal" class="modal fade" tabindex="-1"
+     role="dialog"
+     style="display: none;"
+     aria-hidden="true">
+    <div class="modal-dialog  modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="maptitle">Timeline Data</h4>
+                <button id="chartclosebutton" type="button" class="close" aria-label="Close">
+                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body" id="chartpanel">
+
+                <canvas id="hrchart"></canvas>
+                <canvas id="spo2chart"></canvas>
+
+                <canvas id="stepchart"></canvas>
+
+
+                <canvas id="batterychart"></canvas>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="{% static  'js/vendors.bundle.js' %}"></script>
+<script src="{% static 'js/app.bundle.js' %}"></script>
+<script src="{% static 'js/unicare/utils.js' %}"></script>
+<script src="{% static 'js/datagrid/datatables/datatables.bundle.js' %}"></script>
+<script src="{% static 'js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'js/statistics/chartjs/Chart.bundle.js' %}"></script>
+<script src="{% static 'js/app/chartconfig.js' %}"></script>
+
+<script type="text/javascript" src="https://js.ideal-postcodes.co.uk/postcodes-3.0.7.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8XJndAk1NtITTAfSZ26qOAGxHqacgUUU"></script>
+
+<script>
+    var controls = {
+        leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
+        rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
+    }
+    var token = '{{csrf_token}}';
+
+
+    function getcards() {
+        $("#carddeck").empty()
+        var card_template = " <div data-id=\"1231\" class=\"card-body\">\n" +
+            "                        <div class=\"profile\">\n" +
+            "                            <div class=\"image\">\n" +
+            "                                <div class=\"circle-1\"></div>\n" +
+            "                                <div class=\"circle-2\"></div>\n" +
+            "                                <img class=\"profileimg\" src=\"{% static 'img/demo_women.jpg' %}\" width=\"70\"\n" +
+            "                                     height=\"70\">\n" +
+            "                            </div>\n" +
+            "                            <div class=\"name peoplename\"></div>\n" +
+            "                            <div class=\"job peopleage\"></div>\n" +
+            "                            <div class=\"job spaceholder\">&nbsp;</div>\n" +
+            "                            <div class=\"job sleeptext\">Last night's sleep:</div>\n" +
+            "                            <div class=\"job sleepduration\">9h 26 mins (21:34-06:23)</div>\n" +
+            "                            <div class=\"actions\" style=\"padding-left: 20px\">\n" +
+            "                               <div class=\"row col\">" +
+            "                               <a  class=\" btn locatebtn btn-outline-secondary btn-sm btn-pills " +
+            "                                                        waves-effect waves-themed\"><i class=\"fal fa-sync\"></i></a>" +
+            "                               <a  class=\"btn pillsbtn btn-outline-secondary btn-sm btn-pills " +
+            "                                                          waves-effect waves-themed\"><i class=\"fal fa-pills\"></i></a>" +
+            "                                </div>" +
+            "                               <div class=\"row col\">" +
+            "                               <a  class=\" btn batterybtn btn-outline-secondary btn-sm btn-pills " +
+            "                                                        waves-effect waves-themed\"><i class=\"fal fa-battery-bolt\"></i></a>" +
+            "                               <a  class=\"btn walkbtn btn-outline-secondary btn-sm btn-pills " +
+            "                                                          waves-effect waves-themed\"><i class=\"fal fa-dumbbell\"></i></a>" +
+            "                                </div>" +
+            "                             </div>\n" +
+            "                            <div class=\"job updatetime\">Last Updated:10 mins ago\n" +
+            "                            </div>\n" +
+            "                        </div>\n" +
+            "                        <div class=\"stats\">\n" +
+            "                            <div class=\"box hrbox \" onclick=\"chart()\">\n" +
+            "                                <span class=\"value hrvalue\">n/a</span>\n" +
+            "                                <span class=\"parameter\">\n" +
+            "                                        <img src=\"{% static 'img/hearticon.png' %}\" width=\"20\" height=\"20\"/>\n" +
+            "                                    </span>\n" +
+            "                            </div>\n" +
+            "                         <div class=\"box spo2box \" onclick=\"chart()\">\n" +
+            "                                <span class=\"value spo2value\">n/a</span>\n" +
+            "                                 <span class=\"parameter\">\n" +
+            "                                              <img src=\"{% static 'img/spo2.png' %}\" width=\"20\" height=\"20\"/>\n" +
+            "                                 </span>\n" +
+            "                         </div>\n" +
+            "                            <div class=\"box stepbox\" onclick=\"chart()\">\n" +
+            "                                <span class=\"value stepvalue\">4347</span>\n" +
+            "                                <span class=\"parameter\"><img src=\"{% static 'img/footprint.png' %}\"\n" +
+            "                                                             width=\"20\"\n" +
+            "                                                             height=\"20\"></span>\n" +
+            "                            </div>\n" +
+            "                            <div class=\"box batterybox\" onclick=\"chart()\">\n" +
+            "                                <span class=\"value batteryvalue\">37%</span>\n" +
+            "                                <span class=\"parameter\"><img\n class=\"batteryimg\"" +
+            "                                        src=\"\" \n" +
+            "                                        width=\"10\"\n" +
+            "                                        height=\"20\"></span>\n" +
+            "                            </div>\n" +
+            "                            <div class=\"box mapbox\" onclick=\"mymap()\">\n" +
+            "                                <span class=\"value mapvalue\">find me</span>\n" +
+            "                                <span class=\"parameter\"><img\n class=\"mapimg\"" +
+            "                                        src=\"{% static 'img/map_icon.png' %}\"\n" +
+            "                                        width=\"20\"\n" +
+            "                                        height=\"20\"></span>\n" +
+            "                            </div>\n" +
+            "                        </div>\n" +
+            "                    </div>"
+
+
+        $.ajax({
+            type: "GET",
+            headers: {"X-CSRFToken": token},
+            url: "{% url 'service:dashboard' %}?orgid={{ orgid }}",
+            success: function (result) {
+                if (result.status == "success") {
+                    cards = result.data
+                    cards.forEach(function (item, index) {
+                        card = $(card_template)
+                        card.find(".hrbox").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
+                        card.find(".spo2box").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
+                        card.find(".stepbox").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
+                        card.find(".batterybox").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
+                        card.find(".locatebtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"datasync\")")
+                        card.find(".pillsbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"takepill\")")
+                        card.find(".batterybtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"chargebattery\")")
+                        card.find(".walkbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"beactive\")")
+                        card.find(".mapbox").attr("onclick", "mymap(" + "\"" + item.profileid + "\"" + ")")
+                        card.find(".hrvalue").text(item.hr)
+                        card.find(".spo2value").text(item.spo2)
+                        card.find(".stepvalue").text(item.step)
+                        card.find(".batteryvalue").text(item.battery)
+                        card.find(".peoplename").text(item.name)
+                        card.find(".peopleage").text("age:" + item.age)
+                        if (item.gender == "Male") {
+                            card.find(".profileimg").attr("src", "{% static 'img/demo_man.jpg' %}")
+                        } else {
+                            card.find(".profileimg").attr("src", "{% static 'img/demo_women.jpg' %}")
+                        }
+
+                       
+		                if (item.age > 90) {
+                            card.find(".profileimg").attr("src", "{% static 'img/demo_women1.jpg' %}")
+                        }
+                        else if (item.age == 68)
+                        {
+                            card.find(".profileimg").attr("src", "{% static 'img/demo_lady.jpg' %}")
+                        }
+
+                        if (item.status == "notworn") {
+                            card.find(".stepvalue").text("nw")
+                            card.find(".hrvalue").text("nw")
+                            card.find(".spo2value").text("nw")
+                            card.find(".batteryvalue").text("nw")
+                        }
+
+                        if (item.batterystatus == 1) {
+                            card.find(".batteryimg").attr("src", "{% static 'img/battery-status-charging.png' %}")
+                            card.find(".stepvalue").text("charging")
+                            card.find(".hrvalue").text("charging")
+                            card.find(".spo2value").text("charging")
+                            card.find(".batteryvalue").text("charging")
+                        } else if (item.battery >= 85) {
+                            card.find(".batteryimg").attr("src", "{% static 'img/battery-status-full.png' %}")
+                        } else if (item.battery < 85 && item.battery >= 60) {
+                            card.find(".batteryimg").attr("src", "{% static 'img/battery-status-ok.png' %}")
+                        } else if (item.battery < 60 && item.battery >= 25) {
+                            card.find(".batteryimg").attr("src", "{% static 'img/battery-status-mid.png' %}")
+                        } else if (item.battery < 25) {
+                            card.find(".batteryimg").attr("src", "{% static 'img/battery-status-low.png' %}")
+                        }
+
+
+                        var logdate = new Date(item.timestamp);
+                        var today = new Date();
+                        var diff = Math.abs(today - logdate);
+                        var minutes = Math.floor((diff / 1000) / 60);
+
+                        if(item.sleepstart!="n/a")
+                        {
+                            sleepStart = new Date(item.sleepstart)
+                            sleepEnd = new Date(item.sleepend)
+                            card.find(".sleepduration").text(item.sleepduration+" ("+String(sleepStart.getHours()).padStart(2, '0')+":"+String(sleepStart.getMinutes()).padStart(2, '0')+
+                                "-"+String(sleepEnd.getHours()).padStart(2, '0')+":"+String(sleepEnd.getMinutes()).padStart(2, '0')+")")
+                        }
+                        else {
+                            card.find(".sleepduration").text("Sleep information yet to be updated")
+                        }
+
+
+                        if (!isNaN(minutes)) {
+                            card.find(".updatetime").text("last updated " + minutes + " mins ago")
+                        }
+                        else {
+                            card.find(".updatetime").text("No device assigned")
+                            card.find(".sleepduration").text('n/a')
+                        }
+
+
+                        $("#carddeck").append(card)
+                    });
+
+                }
+            }
+        });
+        /* start data table */
+
+
+    }
+
+    setInterval(function () {
+        getcards()
+    }, 60000);
+
+    function datasync(profileid, action) {
+        $.ajax({
+            type: "GET",
+            headers: {"X-CSRFToken": token},
+            url: "{% url 'service:notification' %}?profileid=" + profileid + "&action=" + action,
+            success: function (result) {
+                if (result.status == "success") {
+                    if (action == "datasync") {
+                        bootbox.alert(
+                            {
+                                title: "<i class='fal fa-check-circle text-success mr-2'></i> <span class='text-success fw-500'>Success!</span>",
+                                message: "<span>Instant data sync request has been sent the device and latest data should be collected very shortly!</span>",
+                                centerVertical: true,
+                                className: "modal-alert",
+                                closeButton: false
+                            });
+                    } else {
+                        bootbox.alert(
+                            {
+                                title: "<i class='fal fa-check-circle text-success mr-2'></i> <span class='text-success fw-500'>Success!</span>",
+                                message: "<span>Your action reminder has been sent to the user successfully!</span>",
+                                centerVertical: true,
+                                className: "modal-alert",
+                                closeButton: false
+                            });
+                    }
+
+                }
+            }
+        })
+    }
+
+
+    function chart(profileid) {
+        var hrctx = document.getElementById('hrchart').getContext('2d');
+        hrctx.canvas.width = 1000;
+        hrctx.canvas.height = 300;
+        var hrchart = new Chart(hrctx, cfg);
+        var hrdataset = hrchart.config.data.datasets[0];
+        hrdataset.type = "line";
+        var hrdata = []
+
+        var spo2ctx = document.getElementById('spo2chart').getContext('2d');
+        spo2ctx.canvas.width = 1000;
+        spo2ctx.canvas.height = 300;
+        var spo2chart = new Chart(spo2ctx, cfg_spo2);
+        var spo2dataset = spo2chart.config.data.datasets[0];
+        spo2dataset.type = "line";
+        var spo2data = []
+
+        var stepctx = document.getElementById('stepchart').getContext('2d');
+        stepctx.canvas.width = 1000;
+        stepctx.canvas.height = 300;
+        var stepchart = new Chart(stepctx, cfg1);
+        var stepdataset = stepchart.config.data.datasets[0];
+        stepdataset.type = "bar";
+        var stepdata = []
+
+
+        var batteryctx = document.getElementById('batterychart').getContext('2d');
+        batteryctx.canvas.width = 1000;
+        batteryctx.canvas.height = 300;
+        var batterychart = new Chart(batteryctx, cfg2);
+        var batterydataset = batterychart.config.data.datasets[0];
+        batterydataset.type = "line";
+        var batterydata = []
+
+        $.ajax({
+            type: "GET",
+            headers: {"X-CSRFToken": token},
+            url: "{% url 'service:sensordata' %}?profileid=" + profileid,
+            success: function (result) {
+                if (result.status == "success") {
+                    var items = result.data
+                    items.forEach(function (item, index) {
+                        hrdata.push({"x": item.timestamp, "y": item.hr})
+                        spo2data.push({"x": item.timestamp, "y": item.spo2})
+                        stepdata.push({"t": item.timestamp, "y": item.step})
+                        batterydata.push({"x": item.timestamp, "y": item.battery})
+                    })
+
+                    for (i=0;i<hrdata.length;i++)
+                    {
+	                //console.log(hrdata[i])
+                        if (hrdata[i]!=undefined && hrdata[i].y<40)
+                        {
+			                if(hrdata[i]!=undefined&&hrdata[i-1]!=undefined&&hrdata[i+1]!=undefined)
+                            {
+                                     hrdata[i].y = parseInt((hrdata[i+1].y+hrdata[i-1].y)/2)
+		                    }
+                        }
+                    }
+                    hrdataset.data = hrdata
+                    hrchart.update();
+
+                    spo2dataset.data = spo2data
+                    spo2chart.update();
+
+                    stepdataset.data = stepdata
+                    stepchart.update();
+
+                    batterydataset.data = batterydata
+                    batterychart.update();
+
+
+                    $("#chartmodal").modal()
+
+                }
+            }
+        })
+
+
+    }
+
+    function mymap(profileid) {
+
+        $.ajax({
+            type: "GET",
+            headers: {"X-CSRFToken": token},
+            url: "{% url 'service:gpsdata' %}?profileid=" + profileid,
+            success: function (result) {
+                if (result.status == "success") {
+                    var lat = result.data.lat;
+                    var lg = result.data.lg;
+                    var timestamp = result.data.timestamp;
+                    var map = new google.maps.Map(document.getElementById('map'), {
+                        center: {lat: lat, lng: lg},
+                        zoom: 14
+                    });
+                    var marker = new google.maps.Marker({
+                        position: {lat: lat, lng: lg},
+                        map: map
+                    });
+                    google.maps.event.trigger(map, 'resize');
+                    var options = {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: 'numeric'
+                    };
+                    $("#maptitle").text("Last updated at: " + new Date(timestamp).toLocaleDateString("en-UK", options))
+                    $("#mapmodal").modal()
+
+                }
+            }
+        })
+
+    }
+
+    $("#mapclosebutton").on("click", () => {
+        $("#mapmodal").modal("hide")
+    })
+
+    $("#chartclosebutton").on("click", () => {
+        $("#chartmodal").modal("hide")
+    })
+
+    $(document).ready(function () {
+        getcards()
+    });
+
+
+</script>
+<!--<script src="js/../script.js"></script>
+<script>
+$(document).ready(function () {
+
+});
+</script>-->
+</body>
+</html>
