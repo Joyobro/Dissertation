@@ -1096,24 +1096,24 @@
 
     function chart(profileid) {
         var hrctx = document.getElementById('hrchart').getContext('2d');
-        hrctx.canvas.width = 1000;
-        hrctx.canvas.height = 300;
+        hrctx.canvas.width = 2000;
+        hrctx.canvas.height = 550;
         var hrchart = new Chart(hrctx, cfg);
         var hrdataset = hrchart.config.data.datasets[0];
         hrdataset.type = "line";
         var hrdata = []
 
         var spo2ctx = document.getElementById('spo2chart').getContext('2d');
-        spo2ctx.canvas.width = 1000;
-        spo2ctx.canvas.height = 300;
+        spo2ctx.canvas.width = 2000;
+        spo2ctx.canvas.height = 550;
         var spo2chart = new Chart(spo2ctx, cfg_spo2);
         var spo2dataset = spo2chart.config.data.datasets[0];
         spo2dataset.type = "line";
         var spo2data = []
 
         var stepctx = document.getElementById('stepchart').getContext('2d');
-        stepctx.canvas.width = 1000;
-        stepctx.canvas.height = 300;
+        stepctx.canvas.width = 2000;
+        stepctx.canvas.height = 550;
         var stepchart = new Chart(stepctx, cfg1);
         var stepdataset = stepchart.config.data.datasets[0];
         stepdataset.type = "bar";
@@ -1121,8 +1121,8 @@
 
 
         var batteryctx = document.getElementById('batterychart').getContext('2d');
-        batteryctx.canvas.width = 1000;
-        batteryctx.canvas.height = 300;
+        batteryctx.canvas.width = 2000;
+        batteryctx.canvas.height = 550;
         var batterychart = new Chart(batteryctx, cfg2);
         var batterydataset = batterychart.config.data.datasets[0];
         batterydataset.type = "line";

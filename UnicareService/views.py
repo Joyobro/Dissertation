@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from UnicareService.utils.utils import POST
 from UnicareService.health.HeartRate import HeartRate
 from UnicareService.health.SleepAnalizer import SleepAnalizer
+
+import traceback
 def organisations(request):
     id = request.GET.get("id")
     if (id is None):
@@ -216,7 +218,9 @@ def dashboard(request):
                 age = (date.today() - profile["dob"]) // timedelta(days=365.2425)
                 sensordata = Sensordata.objects.filter(profileid=profile["id"]).order_by('-timestamp').first()
                 today = datetime.now()
-                start = today - timedelta(hours = 24)#datetime(today.year, today.month, today.day, today.hour-8)
+                start = today - timedelta(days=1)
+                start = start.replace(hour=12, minute=0)
+
                 sleeping_data = list(Sensordata.objects.filter(profileid=profile["id"],
                                                        timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),sleeping=True).order_by("timestamp").values("timestamp"))
                 sleep_start  = "n/a"
@@ -324,19 +328,24 @@ def sensordata(request):
                     sensordata = Sensordata.objects.filter(profileid=result["id"],
                                                            timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).order_by("timestamp").values("timestamp","status","accelerometer");
 
-                    sleep_blocks = SleepAnalizer().process_signal(sensordata)
-                    Sensordata.objects.filter(profileid=result["id"],
-                                              timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
+                    sensordata = list(sensordata)
+                    profile_conf = result["devicesetup"]
+                    profile_conf = json.loads(profile_conf)
+                    data_interval = int(profile_conf["datainterval"])
+                    if(len(sensordata)>=int(60/data_interval)*2): #not having enough data (2 hours here)
+                        sleep_blocks = SleepAnalizer().process_signal(sensordata)
+                        Sensordata.objects.filter(profileid=result["id"],
+                                                  timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
 
-                    for sleep_block in sleep_blocks:
-                        # print("from:",datetime.fromtimestamp(sleep_block[0]/1000.0).strftime("%H:%M"))
-                        # print("to:",datetime.fromtimestamp(sleep_block[1]/1000.0).strftime("%H:%M"))
-                        Sensordata.objects.filter(profileid=result["id"],timestamp__range=(sleep_block[0],sleep_block[1])).update(sleeping=True)
+                        for sleep_block in sleep_blocks:
+                            # print("from:",datetime.fromtimestamp(sleep_block[0]/1000.0).strftime("%H:%M"))
+                            # print("to:",datetime.fromtimestamp(sleep_block[1]/1000.0).strftime("%H:%M"))
+                            Sensordata.objects.filter(profileid=result["id"],timestamp__range=(sleep_block[0],sleep_block[1])).update(sleeping=True)
 
-                    Sensordata.objects.filter(profileid=result["id"], timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
+                        Sensordata.objects.filter(profileid=result["id"], timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
             return JsonResponse({"result": json.loads(result["devicesetup"])}, safe=False)
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             return JsonResponse({"result": "exceptions"}, safe=False)
     elif (request.method=="GET"):
         profileid = request.GET["profileid"]
