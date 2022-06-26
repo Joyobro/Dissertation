@@ -1,2 +1,2 @@
 # unicare
-Once pulled, unzip the www.rar in the same directory
+please use the xhy branch instead of the main
