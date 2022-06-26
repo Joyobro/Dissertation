@@ -905,16 +905,20 @@
             "                            <div class=\"job sleepduration\">9h 26 mins (21:34-06:23)</div>\n" +
             "                            <div class=\"actions\" style=\"padding-left: 20px\">\n" +
             "                               <div class=\"row col\">" +
-            "                               <a  class=\" btn locatebtn btn-outline-secondary btn-sm btn-pills " +
-            "                                                        waves-effect waves-themed\"><i class=\"fal fa-sync\"></i></a>" +
             "                               <a  class=\"btn pillsbtn btn-outline-secondary btn-sm btn-pills " +
             "                                                          waves-effect waves-themed\"><i class=\"fal fa-pills\"></i></a>" +
-            "                                </div>" +
-            "                               <div class=\"row col\">" +
             "                               <a  class=\" btn batterybtn btn-outline-secondary btn-sm btn-pills " +
             "                                                        waves-effect waves-themed\"><i class=\"fal fa-battery-bolt\"></i></a>" +
             "                               <a  class=\"btn walkbtn btn-outline-secondary btn-sm btn-pills " +
             "                                                          waves-effect waves-themed\"><i class=\"fal fa-dumbbell\"></i></a>" +
+            "                                </div>" +
+            "                               <div class=\"row col\">" +
+            "                               <a  class=\" btn locatebtn btn-outline-secondary btn-sm btn-pills " +
+            "                                                        waves-effect waves-themed\"><i class=\"fal fa-sync\"></i></a>" +
+            "                               <a  class=\"btn downloadtn btn-outline-secondary btn-sm btn-pills " +
+            "                                                          waves-effect waves-themed\"><i class=\"fal fa-download\"></i></a>" +
+            "                               <a  class=\"btn annotatetn btn-outline-secondary btn-sm btn-pills " +
+            "                                                          waves-effect waves-themed\"><i class=\"fal fa-pen\"></i></a>" +
             "                                </div>" +
             "                             </div>\n" +
             "                            <div class=\"job updatetime\">Last Updated:10 mins ago\n" +
@@ -970,10 +974,12 @@
                         card.find(".spo2box").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
                         card.find(".stepbox").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
                         card.find(".batterybox").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
-                        card.find(".locatebtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"datasync\")")
+
                         card.find(".pillsbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"takepill\")")
                         card.find(".batterybtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"chargebattery\")")
                         card.find(".walkbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"beactive\")")
+                        card.find(".locatebtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"datasync\")")
+                        card.find(".downloadtn").attr("onclick", "downloadcsv(" + "\"" + item.profileid + "\"" + ")")
                         card.find(".mapbox").attr("onclick", "mymap(" + "\"" + item.profileid + "\"" + ")")
                         card.find(".hrvalue").text(item.hr)
                         card.find(".spo2value").text(item.spo2)
@@ -1093,6 +1099,11 @@
         })
     }
 
+    function downloadcsv(profileid) {
+
+        location.href = "{% url 'service:downloadcsv' %}?profileid=" + profileid
+    }
+
 
     function chart(profileid) {
         var hrctx = document.getElementById('hrchart').getContext('2d');
@@ -1149,10 +1160,11 @@
                         {
 			                if(hrdata[i]!=undefined&&hrdata[i-1]!=undefined&&hrdata[i+1]!=undefined)
                             {
-                                     hrdata[i].y = parseInt((hrdata[i+1].y+hrdata[i-1].y)/2)
+                                hrdata[i].y = parseInt((hrdata[i+1].y+hrdata[i-1].y)/2)
 		                    }
                         }
                     }
+
                     hrdataset.data = hrdata
                     hrchart.update();
 

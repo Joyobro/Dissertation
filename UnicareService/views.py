@@ -1,8 +1,9 @@
+import csv
 import json
 from datetime import date, timedelta,datetime
 from random import randint
 # Create your views here.
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from UnicareService.models import Organisation, Profile, Device,Sensordata
 from django.views.decorators.csrf import csrf_exempt
 from UnicareService.utils.utils import POST
@@ -333,7 +334,7 @@ def sensordata(request):
                     profile_conf = json.loads(profile_conf)
                     data_interval = int(profile_conf["datainterval"])
                     if(len(sensordata)>=int(60/data_interval)*2): #not having enough data (2 hours here)
-                        sleep_blocks = SleepAnalizer().process_signal(sensordata)
+                        sleep_blocks = SleepAnalizer(data_interval).process_signal(sensordata)
                         Sensordata.objects.filter(profileid=result["id"],
                                                   timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
 
@@ -357,3 +358,34 @@ def sensordata(request):
         return JsonResponse({"status":"success","data": list(sensordata)}, safe=False)
 
 
+class Echo:
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
+
+@csrf_exempt
+def downloadcsv(request):
+    if(request.method=="GET"):
+        try:
+            profileid = request.GET["profileid"]
+            profiles = Profile.objects.filter(id=profileid)
+            if(profiles.exists):
+                today = datetime.now()
+                start = today - timedelta(hours = 24)#datetime(today.year, today.month, today.day, today.hour-8)
+                filename = start.strftime("%Y-%m-%d-%H:%M")+"_"+today.strftime("%Y-%m-%d-%H:%M")
+                print(filename)
+                sensordata = Sensordata.objects.filter(profileid=profileid,
+                                                       timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("timestamp","hr","step","battery","spo2","status","accelerometer","ppg","light");
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename='+filename+".csv"
+                writer = csv.writer(response)
+                writer.writerow (["timestamp","hr","step","battery","spo2","status","accelerometer","ppg","light"])
+                for e in sensordata.values_list("timestamp","hr","step","battery","spo2","status","accelerometer","ppg","light"):
+                    writer.writerow(e)
+                return response
+        except Exception as e:
+            traceback.print_exc()
+            return JsonResponse({"result": "exceptions"}, safe=False)
