@@ -185,6 +185,7 @@ class Sensordata(models.Model):
     status = models.CharField(max_length=45, blank=True, null=True)
     batterystatus = models.IntegerField(blank=True, null=True)
     accelerometer = models.TextField(blank=True,null=True)
+    gyoscope = models.TextField(blank=True,null=True)
     light = models.TextField(blank=True,null=True)
     stress = models.FloatField(blank=True,null=True)
     bloodpressure = models.TextField(blank=True,null=True)

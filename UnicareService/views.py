@@ -8,7 +8,9 @@ from UnicareService.models import Organisation, Profile, Device,Sensordata
 from django.views.decorators.csrf import csrf_exempt
 from UnicareService.utils.utils import POST
 from UnicareService.health.HeartRate import HeartRate
+from UnicareService.health.HREstimator import HREstimator
 from UnicareService.health.SleepAnalizer import SleepAnalizer
+import numpy as np
 
 import traceback
 def organisations(request):
@@ -297,8 +299,9 @@ def sensordata(request):
     if(request.method=="POST"):
         try:
             sensor_data_array = json.loads(request.body)
-            hm = HeartRate()
+            # hm = HeartRate()
             # print(sensor_data_array)
+            hm = HREstimator(sample_rate=400)
             for sensor in sensor_data_array:
                 id=sensor["deviceId"]
                 profiles = Profile.objects.filter(deviceid=id).values("id","devicesetup")
@@ -306,22 +309,23 @@ def sensordata(request):
                 if (profiles.exists()):
                     result = profiles[0]
                     spo2 = randint(90,100)
-                    if("ppgData" in sensor):
-                        ppgData = sensor["ppgData"]
-                        ppgBuffer = ppgData['ppgBuffer']
+                    ppgData = np.array(sensor["ppgData"])
+                    ppgData = ppgData[ppgData!=0]
+                    if(len(ppgData)>0):
+                        # ppgBuffer = ppgData['ppgBuffer']
+                        # hm.sig = ppgBuffer
                         # sample_rate = int(len(ppgBuffer)/((ppgData['endTime']-ppgData['startTime'])/1000))
-                        hr = int((hm.process_signal(ppgBuffer)))
-                        # hr = 0
-
+                        # hr = int((hm.process_signal(ppgBuffer)))
+                        hr = np.mean(ppgData[-3:])#hm.calculate_heart_rate(ppgBuffer, polyorder=6, mode='nearest', smt_order=6, window_size=650, filter_order=3, cutoffs=[0.85, 3.5])
                         sensordata = Sensordata(deviceid=id, profileid=result["id"],lat=sensor["lat"], lg=sensor["log"],
                                                 battery=sensor["battery"], step=sensor["step"], ppg=sensor["ppgData"], hr=hr,
                                                 timestamp=sensor["timestamp"],batterystatus=sensor["batteryStatus"],status=sensor["status"],
-                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],stress=0.0,bloodpressure=None,spo2=spo2,sleeping=False,processed=False)
+                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],gyoscope=sensor["gyoBuffer"],stress=0.0,bloodpressure=None,spo2=spo2,sleeping=False,processed=False)
                     else:
                         sensordata = Sensordata(deviceid=id, profileid=result["id"],lat=sensor["lat"], lg=sensor["log"],
                                                 battery=sensor["battery"], step=sensor["step"], ppg=None,
                                                 timestamp=sensor["timestamp"],batterystatus=sensor["batteryStatus"],status=sensor["status"],
-                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],stress=0.0,bloodpressure=None,spo2=None,sleeping=False,processed=False)
+                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],gyoscope=sensor["gyoBuffer"],stress=0.0,bloodpressure=None,spo2=None,sleeping=False,processed=False)
                     sensordata.save()
 
                     today = datetime.now()
@@ -378,12 +382,12 @@ def downloadcsv(request):
                 filename = start.strftime("%Y-%m-%d-%H:%M")+"_"+today.strftime("%Y-%m-%d-%H:%M")
                 print(filename)
                 sensordata = Sensordata.objects.filter(profileid=profileid,
-                                                       timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("timestamp","hr","step","battery","spo2","status","accelerometer","ppg","light");
+                                                       timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("timestamp","hr","step","battery","spo2","status","accelerometer","ppg","light","gyoscope");
                 response = HttpResponse(content_type='text/csv')
                 response['Content-Disposition'] = 'attachment; filename='+filename+".csv"
                 writer = csv.writer(response)
-                writer.writerow (["timestamp","hr","step","battery","spo2","status","accelerometer","ppg","light"])
-                for e in sensordata.values_list("timestamp","hr","step","battery","spo2","status","accelerometer","ppg","light"):
+                writer.writerow (["timestamp","hr","step","battery","spo2","status","accelerometer","ppg","light","gyoscope"])
+                for e in sensordata.values_list("timestamp","hr","step","battery","spo2","status","accelerometer","ppg","light","gyoscope"):
                     writer.writerow(e)
                 return response
         except Exception as e:
