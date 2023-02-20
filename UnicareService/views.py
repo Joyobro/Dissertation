@@ -4,7 +4,7 @@ from datetime import date, timedelta,datetime
 from random import randint
 # Create your views here.
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
-from UnicareService.models import Organisation, Profile, Device,Sensordata
+from UnicareService.models import Organisation, Profile, Device,Sensordata,Alarm
 from django.views.decorators.csrf import csrf_exempt
 from UnicareService.utils.utils import POST
 from UnicareService.health.HeartRate import HeartRate
@@ -301,7 +301,7 @@ def sensordata(request):
             sensor_data_array = json.loads(request.body)
             # hm = HeartRate()
             # print(sensor_data_array)
-            hm = HREstimator(sample_rate=400)
+            # hm = HREstimator(sample_rate=400)
             for sensor in sensor_data_array:
                 id=sensor["deviceId"]
                 profiles = Profile.objects.filter(deviceid=id).values("id","devicesetup")
@@ -328,6 +328,12 @@ def sensordata(request):
                                                 accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],gyoscope=sensor["gyoBuffer"],stress=0.0,bloodpressure=None,spo2=None,sleeping=False,processed=False)
                     sensordata.save()
 
+                    #alarmtype==0 /notworn
+                    if(sensor['status']=='notworn' and sensor["batteryStatus"]==0):
+                        alarm = Alarm(deviceid=id,profileid=result["id"],timestamp=sensor["timestamp"],sovled=False,alarmtype=0)
+                        alarm.save()
+                    elif (sensor['status']=='worn' or sensor["batteryStatus"]==1):
+                        Alarm.objects.filter(profileid=result["id"],sovled=0,alarmtype=0).update(solved=True,actiontime=sensor["timestamp"],responsetime=sensor["timestamp"])
 
                     # profile_conf = result["devicesetup"]
                     # profile_conf = json.loads(profile_conf)
