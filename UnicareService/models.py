@@ -206,7 +206,7 @@ class Alarm(models.Model):
     actiontime = models.BigIntegerField(blank=True, null=True)
     responsetime = models.BigIntegerField(blank=True, null=True)
     alarmtype = models.IntegerField(blank=True,null=True)
-    sovled = models.BooleanField(blank=True,null=True)
+    solved = models.BooleanField(blank=True,null=True)
     class Meta:
         managed = False
         db_table = 'alarm'

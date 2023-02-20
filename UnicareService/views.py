@@ -7,9 +7,9 @@ from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from UnicareService.models import Organisation, Profile, Device,Sensordata,Alarm
 from django.views.decorators.csrf import csrf_exempt
 from UnicareService.utils.utils import POST
-from UnicareService.health.HeartRate import HeartRate
-from UnicareService.health.HREstimator import HREstimator
-from UnicareService.health.SleepAnalizer import SleepAnalizer
+# from UnicareService.health.HeartRate import HeartRate
+# from UnicareService.health.HREstimator import HREstimator
+# from UnicareService.health.SleepAnalizer import SleepAnalizer
 import numpy as np
 
 import traceback
@@ -330,10 +330,10 @@ def sensordata(request):
 
                     #alarmtype==0 /notworn
                     if(sensor['status']=='notworn' and sensor["batteryStatus"]==0):
-                        alarm = Alarm(deviceid=id,profileid=result["id"],timestamp=sensor["timestamp"],sovled=False,alarmtype=0)
+                        alarm = Alarm(deviceid=id,profileid=result["id"],timestamp=sensor["timestamp"],solved=False,alarmtype=0)
                         alarm.save()
                     elif (sensor['status']=='worn' or sensor["batteryStatus"]==1):
-                        Alarm.objects.filter(profileid=result["id"],sovled=0,alarmtype=0).update(solved=True,actiontime=sensor["timestamp"],responsetime=sensor["timestamp"])
+                        Alarm.objects.filter(profileid=result["id"],solved=0,alarmtype=0).update(solved=True,actiontime=sensor["timestamp"],responsetime=sensor["timestamp"])
 
                     # profile_conf = result["devicesetup"]
                     # profile_conf = json.loads(profile_conf)
