@@ -328,26 +328,27 @@ def sensordata(request):
                                                 accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],gyoscope=sensor["gyoBuffer"],stress=0.0,bloodpressure=None,spo2=None,sleeping=False,processed=False)
                     sensordata.save()
 
-                    today = datetime.now()
-                    start = today - timedelta(hours = 24)#datetime(today.year, today.month, today.day, today.hour-8)
-                    sensordata = Sensordata.objects.filter(profileid=result["id"],
-                                                           timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).order_by("timestamp").values("timestamp","status","accelerometer");
 
-                    sensordata = list(sensordata)
-                    profile_conf = result["devicesetup"]
-                    profile_conf = json.loads(profile_conf)
-                    data_interval = int(profile_conf["datainterval"])
-                    if(len(sensordata)>=int(60/data_interval)*2): #not having enough data (2 hours here)
-                        sleep_blocks = SleepAnalizer(data_interval).process_signal(sensordata)
-                        Sensordata.objects.filter(profileid=result["id"],
-                                                  timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
+                    # profile_conf = result["devicesetup"]
+                    # profile_conf = json.loads(profile_conf)
+                    # today = datetime.now()
+                    # start = today - timedelta(hours = 24)#datetime(today.year, today.month, today.day, today.hour-8)
+                    # sensordata = Sensordata.objects.filter(profileid=result["id"],
+                    #                                        timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).order_by("timestamp").values("timestamp","status","accelerometer");
 
-                        for sleep_block in sleep_blocks:
-                            # print("from:",datetime.fromtimestamp(sleep_block[0]/1000.0).strftime("%H:%M"))
-                            # print("to:",datetime.fromtimestamp(sleep_block[1]/1000.0).strftime("%H:%M"))
-                            Sensordata.objects.filter(profileid=result["id"],timestamp__range=(sleep_block[0],sleep_block[1])).update(sleeping=True)
-
-                        Sensordata.objects.filter(profileid=result["id"], timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
+                    # sensordata = list(sensordata)
+                    # data_interval = int(profile_conf["datainterval"])
+                    # if(len(sensordata)>=int(60/data_interval)*2): #not having enough data (2 hours here)
+                    #     sleep_blocks = SleepAnalizer(data_interval).process_signal(sensordata)
+                    #     Sensordata.objects.filter(profileid=result["id"],
+                    #                               timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
+                    #
+                    #     for sleep_block in sleep_blocks:
+                    #         # print("from:",datetime.fromtimestamp(sleep_block[0]/1000.0).strftime("%H:%M"))
+                    #         # print("to:",datetime.fromtimestamp(sleep_block[1]/1000.0).strftime("%H:%M"))
+                    #         Sensordata.objects.filter(profileid=result["id"],timestamp__range=(sleep_block[0],sleep_block[1])).update(sleeping=True)
+                    #
+                    #     Sensordata.objects.filter(profileid=result["id"], timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
             return JsonResponse({"result": json.loads(result["devicesetup"])}, safe=False)
         except Exception as e:
             traceback.print_exc()
