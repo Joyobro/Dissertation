@@ -149,11 +149,11 @@
 
         .stats .box {
             box-sizing: border-box;
-            width: 80px;
-            height: 64px;
+            width: 70px;
+            height: 50px;
             background: #63C8F2;
             text-align: center;
-            padding-top: 5px;
+            padding-top: 3px;
             margin-bottom: 1px;
             transition: all .4s ease-in-out;
         }
@@ -172,7 +172,7 @@
         }
 
         .stats .value {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 400;
             color: #fffffd;
         }
@@ -900,17 +900,17 @@
             "                            </div>\n" +
             "                            <div class=\"name peoplename\"></div>\n" +
             "                            <div class=\"job peopleage\"></div>\n" +
-            "                            <div class=\"job spaceholder\">&nbsp;</div>\n" +
-            "                            <div class=\"job sleeptext\">Last night's sleep:</div>\n" +
-            "                            <div class=\"job sleepduration\">n/a</div>\n" +
+            {#"                            <div class=\"job spaceholder\">&nbsp;</div>\n" +#}
+            {#"                            <div class=\"job sleeptext\">Last night's sleep:</div>\n" +#}
+            {#"                            <div class=\"job sleepduration\">n/a</div>\n" +#}
             "                            <div class=\"actions\" style=\"padding-left: 20px\">\n" +
             "                               <div class=\"row col\">" +
-            "                               <a  class=\"btn pillsbtn btn-outline-secondary btn-sm btn-pills " +
-            "                                                          waves-effect waves-themed\"><i class=\"fal fa-pills\"></i></a>" +
-            "                               <a  class=\" btn batterybtn btn-outline-secondary btn-sm btn-pills " +
+            "                               <a  class=\"btn pillsbtn btn-outline-secondary btn-sm btn-pills disabled" +
+            "                                                          waves-effect waves-themed\"><i class=\"fal fa-unlink\"></i></a>" +
+            "                               <a  class=\" btn batterybtn btn-outline-secondary btn-sm btn-pills disabled " +
             "                                                        waves-effect waves-themed\"><i class=\"fal fa-battery-bolt\"></i></a>" +
-            "                               <a  class=\"btn walkbtn btn-outline-secondary btn-sm btn-pills " +
-            "                                                          waves-effect waves-themed\"><i class=\"fal fa-dumbbell\"></i></a>" +
+            "                               <a  class=\"btn walkbtn btn-outline-secondary btn-sm btn-pills disabled" +
+            "                                                          waves-effect waves-themed\"><i class=\"fal fa-exclamation\"></i></a>" +
             "                                </div>" +
             "                               <div class=\"row col\">" +
             "                               <a  class=\" btn locatebtn btn-outline-secondary btn-sm btn-pills " +
@@ -928,34 +928,34 @@
             "                            <div class=\"box hrbox \" onclick=\"chart()\">\n" +
             "                                <span class=\"value hrvalue\">n/a</span>\n" +
             "                                <span class=\"parameter\">\n" +
-            "                                        <img src=\"{% static 'img/hearticon.png' %}\" width=\"20\" height=\"20\"/>\n" +
+            "                                        <img src=\"{% static 'img/hearticon.png' %}\" width=\"15\" height=\"15\"/>\n" +
             "                                    </span>\n" +
             "                            </div>\n" +
             "                         <div class=\"box spo2box \" onclick=\"chart()\">\n" +
             "                                <span class=\"value spo2value\">n/a</span>\n" +
             "                                 <span class=\"parameter\">\n" +
-            "                                              <img src=\"{% static 'img/spo2.png' %}\" width=\"20\" height=\"20\"/>\n" +
+            "                                              <img src=\"{% static 'img/spo2.png' %}\" width=\"15\" height=\"15\"/>\n" +
             "                                 </span>\n" +
             "                         </div>\n" +
             "                            <div class=\"box stepbox\" onclick=\"chart()\">\n" +
             "                                <span class=\"value stepvalue\">4347</span>\n" +
             "                                <span class=\"parameter\"><img src=\"{% static 'img/footprint.png' %}\"\n" +
-            "                                                             width=\"20\"\n" +
-            "                                                             height=\"20\"></span>\n" +
+            "                                                             width=\"15\"\n" +
+            "                                                             height=\"15 \"></span>\n" +
             "                            </div>\n" +
             "                            <div class=\"box batterybox\" onclick=\"chart()\">\n" +
             "                                <span class=\"value batteryvalue\">37%</span>\n" +
             "                                <span class=\"parameter\"><img\n class=\"batteryimg\"" +
             "                                        src=\"\" \n" +
             "                                        width=\"10\"\n" +
-            "                                        height=\"20\"></span>\n" +
+            "                                        height=\"15\"></span>\n" +
             "                            </div>\n" +
             "                            <div class=\"box mapbox\" onclick=\"mymap()\">\n" +
             "                                <span class=\"value mapvalue\">find me</span>\n" +
             "                                <span class=\"parameter\"><img\n class=\"mapimg\"" +
             "                                        src=\"{% static 'img/map_icon.png' %}\"\n" +
-            "                                        width=\"20\"\n" +
-            "                                        height=\"20\"></span>\n" +
+            "                                        width=\"15\"\n" +
+            "                                        height=\"15\"></span>\n" +
             "                            </div>\n" +
             "                        </div>\n" +
             "                    </div>"
