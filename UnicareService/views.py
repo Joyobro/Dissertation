@@ -220,20 +220,22 @@ def dashboard(request):
             for profile in Profile.objects.filter(orgid=orgid).values():
                 age = (date.today() - profile["dob"]) // timedelta(days=365.2425)
                 sensordata = Sensordata.objects.filter(profileid=profile["id"]).order_by('-timestamp').first()
-                today = datetime.now()
-                start = today - timedelta(days=1)
-                start = start.replace(hour=12, minute=0)
-
-                sleeping_data = list(Sensordata.objects.filter(profileid=profile["id"],
-                                                       timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),sleeping=True).order_by("timestamp").values("timestamp"))
-                sleep_start  = "n/a"
-                sleep_end = "n/a"
-                sleep_duration = "n/a"
-                if (len(sleeping_data)>0):
-                    sleep_start = sleeping_data[0]["timestamp"]
-                    sleep_end =  sleeping_data[-1]["timestamp"]
-                    total_slp_duration = int(sleeping_data[-1]["timestamp"]/1000.0-sleeping_data[0]["timestamp"]/1000.0)/60 #(in mins)
-                    sleep_duration = str(int(total_slp_duration//60))+'h '+str(int(total_slp_duration%60))+'m',
+                alarms = list(Alarm.objects.filter(profileid=profile["id"],solved=0).values())
+                print(alarms)
+                # today = datetime.now()
+                # start = today - timedelta(days=1)
+                # start = start.replace(hour=12, minute=0)
+                #
+                # sleeping_data = list(Sensordata.objects.filter(profileid=profile["id"],
+                #                                        timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),sleeping=True).order_by("timestamp").values("timestamp"))
+                # sleep_start  = "n/a"
+                # sleep_end = "n/a"
+                # sleep_duration = "n/a"
+                # if (len(sleeping_data)>0):
+                #     sleep_start = sleeping_data[0]["timestamp"]
+                #     sleep_end =  sleeping_data[-1]["timestamp"]
+                #     total_slp_duration = int(sleeping_data[-1]["timestamp"]/1000.0-sleeping_data[0]["timestamp"]/1000.0)/60 #(in mins)
+                #     sleep_duration = str(int(total_slp_duration//60))+'h '+str(int(total_slp_duration%60))+'m',
                 if(sensordata is not None):
                     new_profile = {"profileid": profile["id"],
                                    "name": profile["firstname"] + " " + profile["lastname"],
@@ -247,11 +249,12 @@ def dashboard(request):
                                    "battery":sensordata.battery,
                                    "batterystatus": sensordata.batterystatus,
                                    "status":sensordata.status,
-                                   "sleepstart":sleep_start,
-                                   "sleepend":sleep_end,
-                                   "sleepduration":sleep_duration,
+                                   # "sleepstart":sleep_start,
+                                   # "sleepend":sleep_end,
+                                   # "sleepduration":sleep_duration,
                                    "age": age,
-                                   "gender": profile["gender"]}
+                                   "gender": profile["gender"],
+                                   "alarms":alarms}
                 else:
                     new_profile = {"profileid": profile["id"],
                                    "name": profile["firstname"] + " " + profile["lastname"],
@@ -263,7 +266,8 @@ def dashboard(request):
                                    "lg": "n/a",
                                    "batterystatus": "n/a",
                                    "age": age,
-                                   "gender": profile["gender"]}
+                                   "gender": profile["gender"],
+                                   "alarms":alarms}
                 profiles.append(new_profile);
 
             profiles.reverse()

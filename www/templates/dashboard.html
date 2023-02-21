@@ -902,7 +902,7 @@
             "                            <div class=\"job peopleage\"></div>\n" +
             "                            <div class=\"job spaceholder\">&nbsp;</div>\n" +
             "                            <div class=\"job sleeptext\">Last night's sleep:</div>\n" +
-            "                            <div class=\"job sleepduration\">9h 26 mins (21:34-06:23)</div>\n" +
+            "                            <div class=\"job sleepduration\">n/a</div>\n" +
             "                            <div class=\"actions\" style=\"padding-left: 20px\">\n" +
             "                               <div class=\"row col\">" +
             "                               <a  class=\"btn pillsbtn btn-outline-secondary btn-sm btn-pills " +
@@ -1031,16 +1031,16 @@
                         var diff = Math.abs(today - logdate);
                         var minutes = Math.floor((diff / 1000) / 60);
 
-                        if(item.sleepstart!="n/a")
-                        {
-                            sleepStart = new Date(item.sleepstart)
-                            sleepEnd = new Date(item.sleepend)
-                            card.find(".sleepduration").text(item.sleepduration+" ("+String(sleepStart.getHours()).padStart(2, '0')+":"+String(sleepStart.getMinutes()).padStart(2, '0')+
-                                "-"+String(sleepEnd.getHours()).padStart(2, '0')+":"+String(sleepEnd.getMinutes()).padStart(2, '0')+")")
-                        }
-                        else {
-                            card.find(".sleepduration").text("Sleep information yet to be updated")
-                        }
+                        {#if(item.sleepstart!="n/a")#}
+                        {#{#}
+                        {#    sleepStart = new Date(item.sleepstart)#}
+                        {#    sleepEnd = new Date(item.sleepend)#}
+                        {#    card.find(".sleepduration").text(item.sleepduration+" ("+String(sleepStart.getHours()).padStart(2, '0')+":"+String(sleepStart.getMinutes()).padStart(2, '0')+#}
+                        {#        "-"+String(sleepEnd.getHours()).padStart(2, '0')+":"+String(sleepEnd.getMinutes()).padStart(2, '0')+")")#}
+                        {#}#}
+                        {#else {#}
+                        {#    card.find(".sleepduration").text("Sleep information yet to be updated")#}
+                        {#}#}
 
 
                         if (!isNaN(minutes)) {
