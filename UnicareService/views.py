@@ -7,7 +7,7 @@ from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from UnicareService.models import Organisation, Profile, Device,Sensordata,Alarm
 from django.views.decorators.csrf import csrf_exempt
 from UnicareService.utils.utils import POST
-# from UnicareService.health.HeartRate import HeartRate
+from UnicareService.health.HeartRate import HeartRate
 # from UnicareService.health.HREstimator import HREstimator
 # from UnicareService.health.SleepAnalizer import SleepAnalizer
 import numpy as np
@@ -221,7 +221,6 @@ def dashboard(request):
                 age = (date.today() - profile["dob"]) // timedelta(days=365.2425)
                 sensordata = Sensordata.objects.filter(profileid=profile["id"]).order_by('-timestamp').first()
                 alarms = list(Alarm.objects.filter(profileid=profile["id"],solved=0).values())
-                print(alarms)
                 # today = datetime.now()
                 # start = today - timedelta(days=1)
                 # start = start.replace(hour=12, minute=0)
@@ -236,8 +235,13 @@ def dashboard(request):
                 #     sleep_end =  sleeping_data[-1]["timestamp"]
                 #     total_slp_duration = int(sleeping_data[-1]["timestamp"]/1000.0-sleeping_data[0]["timestamp"]/1000.0)/60 #(in mins)
                 #     sleep_duration = str(int(total_slp_duration//60))+'h '+str(int(total_slp_duration%60))+'m',
+                if "deviceid_id" in profile:
+                    device = profile["deviceid_id"]
+                else:
+                    device = None
                 if(sensordata is not None):
                     new_profile = {"profileid": profile["id"],
+                                   "deviceid": device,
                                    "name": profile["firstname"] + " " + profile["lastname"],
                                    "dob": profile["dob"],
                                    "hr":sensordata.hr,
@@ -257,6 +261,7 @@ def dashboard(request):
                                    "alarms":alarms}
                 else:
                     new_profile = {"profileid": profile["id"],
+                                   "deviceid": device,
                                    "name": profile["firstname"] + " " + profile["lastname"],
                                    "dob": profile["dob"],
                                    "hr": "n/a",
@@ -303,28 +308,35 @@ def sensordata(request):
     if(request.method=="POST"):
         try:
             sensor_data_array = json.loads(request.body)
-            # hm = HeartRate()
+            hm = HeartRate()
             # print(sensor_data_array)
             # hm = HREstimator(sample_rate=400)
             for sensor in sensor_data_array:
                 id=sensor["deviceId"]
                 profiles = Profile.objects.filter(deviceid=id).values("id","devicesetup")
-
                 if (profiles.exists()):
                     result = profiles[0]
-                    spo2 = randint(90,100)
-                    ppgData = np.array(sensor["ppgData"])
-                    ppgData = ppgData[ppgData!=0]
+                    # spo2 = randint(90,100)
+                    ppgData = sensor["ppgData"]
+                    # ppgData = ppgData[ppgData!=0]
                     if(len(ppgData)>0):
+                        hr = 0
+                        rr = 0
+                        for ppg in ppgData:
+                            ppgBuffer = ppg["ppgBuffer"]
+                            hr = hr+hm.process_signal(ppgBuffer)
+                            rr = rr+hm.process_rr_signal(ppgBuffer)
+                        hr = int(hr/len(ppgData))
+                        rr = int(rr/len(ppgData))
                         # ppgBuffer = ppgData['ppgBuffer']
                         # hm.sig = ppgBuffer
                         # sample_rate = int(len(ppgBuffer)/((ppgData['endTime']-ppgData['startTime'])/1000))
                         # hr = int((hm.process_signal(ppgBuffer)))
-                        hr = np.mean(ppgData[-3:])#hm.calculate_heart_rate(ppgBuffer, polyorder=6, mode='nearest', smt_order=6, window_size=650, filter_order=3, cutoffs=[0.85, 3.5])
+                        # hr =0# np.mean(ppgData[-3:])#hm.calculate_heart_rate(ppgBuffer, polyorder=6, mode='nearest', smt_order=6, window_size=650, filter_order=3, cutoffs=[0.85, 3.5])
                         sensordata = Sensordata(deviceid=id, profileid=result["id"],lat=sensor["lat"], lg=sensor["log"],
                                                 battery=sensor["battery"], step=sensor["step"], ppg=sensor["ppgData"], hr=hr,
                                                 timestamp=sensor["timestamp"],batterystatus=sensor["batteryStatus"],status=sensor["status"],
-                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],gyoscope=sensor["gyoBuffer"],stress=0.0,bloodpressure=None,spo2=spo2,sleeping=False,processed=False)
+                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],gyoscope=sensor["gyoBuffer"],stress=0.0,bloodpressure=None,spo2=rr,sleeping=False,processed=False)
                     else:
                         sensordata = Sensordata(deviceid=id, profileid=result["id"],lat=sensor["lat"], lg=sensor["log"],
                                                 battery=sensor["battery"], step=sensor["step"], ppg=None,
@@ -333,11 +345,11 @@ def sensordata(request):
                     sensordata.save()
 
                     #alarmtype==0 /notworn
-                    if(sensor['status']=='notworn' and sensor["batteryStatus"]==0):
-                        alarm = Alarm(deviceid=id,profileid=result["id"],timestamp=sensor["timestamp"],solved=False,alarmtype=0)
-                        alarm.save()
-                    elif (sensor['status']=='worn' or sensor["batteryStatus"]==1):
-                        Alarm.objects.filter(profileid=result["id"],solved=0,alarmtype=0).update(solved=True,actiontime=sensor["timestamp"],responsetime=sensor["timestamp"])
+                    # if(sensor['status']=='notworn' and sensor["batteryStatus"]==0):
+                    #     alarm = Alarm(deviceid=id,profileid=result["id"],timestamp=sensor["timestamp"],solved=False,alarmtype=0)
+                    #     alarm.save()
+                    # elif (sensor['status']=='worn' or sensor["batteryStatus"]==1):
+                    #     Alarm.objects.filter(profileid=result["id"],solved=0,alarmtype=0).update(solved=True,actiontime=sensor["timestamp"],responsetime=sensor["timestamp"])
 
                     # profile_conf = result["devicesetup"]
                     # profile_conf = json.loads(profile_conf)
