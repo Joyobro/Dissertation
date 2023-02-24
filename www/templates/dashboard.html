@@ -1028,12 +1028,12 @@
                                 card.find(".hrvalue").text("nw")
                                 card.find(".spo2value").text("nw")
                                 card.find(".batteryvalue").text("nw")
-                                wearBtn.removeClass("disabled")
+                                {#wearBtn.removeClass("disabled")#}
                                 wearBtn.attr("interval",setInterval(flash.bind(null, wearBtn,"rgba(245,144,39,0.8"), 400))
                             }
                             else
                             {
-                                card.find(".pillsbtn").addClass("disabled")
+                                {#card.find(".pillsbtn").addClass("disabled")#}
                                 clearInterval(wearBtn.attr("interval"));
                                 wearBtn.css('background-color','rgba(0,0,0,0')
                             }

@@ -316,23 +316,25 @@ def sensordata(request):
                 profiles = Profile.objects.filter(deviceid=id).values("id","devicesetup")
                 if (profiles.exists()):
                     result = profiles[0]
-                    # spo2 = randint(90,100)
+                    spo2 = randint(90,100)
                     ppgData = sensor["ppgData"]
                     # ppgData = ppgData[ppgData!=0]
+                    hr = 0
+                    rr = 0
                     if(len(ppgData)>0):
-                        hr = 0
-                        rr = 0
+                        counter = 0
                         for ppg in ppgData:
                             ppgBuffer = ppg["ppgBuffer"]
-                            hr = hr+hm.process_signal(ppgBuffer)
-                            rr = rr+hm.process_rr_signal(ppgBuffer)
-                        hr = int(hr/len(ppgData))
-                        rr = int(rr/len(ppgData))
-                        # ppgBuffer = ppgData['ppgBuffer']
-                        # hm.sig = ppgBuffer
-                        # sample_rate = int(len(ppgBuffer)/((ppgData['endTime']-ppgData['startTime'])/1000))
-                        # hr = int((hm.process_signal(ppgBuffer)))
-                        # hr =0# np.mean(ppgData[-3:])#hm.calculate_heart_rate(ppgBuffer, polyorder=6, mode='nearest', smt_order=6, window_size=650, filter_order=3, cutoffs=[0.85, 3.5])
+                            new_hr = hm.process_signal(ppgBuffer)
+                            new_rr = hm.process_rr_signal(ppgBuffer)
+                            if new_hr!=0 and new_rr!=0:
+                                hr = hr+new_hr
+                                rr = rr+new_rr
+                                counter+=1
+                        if counter>0:
+                            hr = int(hr/(counter))
+                            rr = int(rr/(counter))
+
                         sensordata = Sensordata(deviceid=id, profileid=result["id"],lat=sensor["lat"], lg=sensor["log"],
                                                 battery=sensor["battery"], step=sensor["step"], ppg=sensor["ppgData"], hr=hr,
                                                 timestamp=sensor["timestamp"],batterystatus=sensor["batteryStatus"],status=sensor["status"],

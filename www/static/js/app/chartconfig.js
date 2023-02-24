@@ -57,8 +57,8 @@ var cfg = {
                 autoSkip: true,
                 autoSkipPadding: 15,
                 ticks: {
-                    suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
-                    beginAtZero: true   // minimum value will be 0.
+                    suggestedMin: 30,    // minimum will be 0, unless there is a lower value.
+                    suggestedMax: 180
                 }
             }]
         },
@@ -128,7 +128,7 @@ var cfg_spo2 = {
                 autoSkipPadding: 15,
                 ticks: {
                     suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
-                    beginAtZero: true   // minimum value will be 0.
+                    suggestedMax: 30   // minimum value will be 0.
                 }
             }]
         },
