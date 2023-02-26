@@ -12,16 +12,16 @@ window.chartColors = {
 var cfg = {
     data: {
         datasets: [{
-            label: 'Heart Rate Trend',
+            label: 'Heart Rate',
             backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
             borderColor: window.chartColors.red,
             data: [],
-            type: 'line',
-            pointRadius: 0,
-            borderWidth: 0.5,
+            type: 'scatter',
+            showLine: false,
+            pointRadius: 2,
+            borderWidth: 0,
             fill: false,
-            lineTension: 0,
-            borderWidth: 2
+            lineTension: 0
         }]
     },
     options: {
@@ -57,8 +57,9 @@ var cfg = {
                 autoSkip: true,
                 autoSkipPadding: 15,
                 ticks: {
-                    suggestedMin: 30,    // minimum will be 0, unless there is a lower value.
-                    suggestedMax: 180
+                    min: 30,    // minimum will be 0, unless there is a lower value.
+                    max: 180,
+                    stepSize: 30
                 }
             }]
         },
@@ -82,16 +83,16 @@ var cfg = {
 var cfg_spo2 = {
     data: {
         datasets: [{
-            label: 'Spo2 Trend',
+            label: 'Respiratory Rate',
             backgroundColor: color(window.chartColors.green).alpha(0.5).rgbString(),
             borderColor: window.chartColors.green,
             data: [],
-            type: 'line',
-            pointRadius: 0,
-            borderWidth: 0.5,
+            type: 'scatter',
+            showLine: false,
+            pointRadius: 2,
+            borderWidth: 0,
             fill: false,
-            lineTension: 0,
-            borderWidth: 2
+            lineTension: 0
         }]
     },
     options: {
@@ -122,11 +123,12 @@ var cfg_spo2 = {
                 },
                 scaleLabel: {
                     display: true,
-                    labelString: 'SPO2 (%)'
+                    labelString: 'RR (avg)'
                 },
                 autoSkip: true,
                 autoSkipPadding: 15,
                 ticks: {
+                    stepSize: 10,
                     suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
                     suggestedMax: 30   // minimum value will be 0.
                 }
@@ -152,7 +154,7 @@ var cfg_spo2 = {
 var cfg1 = {
     data: {
         datasets: [{
-            label: 'Activity Trend',
+            label: 'Activity (Steps)',
             backgroundColor: color(window.chartColors.blue).alpha(0.8).rgbString(),
             borderColor: window.chartColors.blue,
             data: [],
@@ -218,7 +220,7 @@ var cfg1 = {
 var cfg2 = {
     data: {
         datasets: [{
-            label: 'Battery Usage Trend',
+            label: 'Battery Usage',
             backgroundColor: color(window.chartColors.orange).alpha(0.5).rgbString(),
             borderColor: window.chartColors.orange,
             data: [],

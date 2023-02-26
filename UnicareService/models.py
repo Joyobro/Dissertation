@@ -193,6 +193,7 @@ class Sensordata(models.Model):
     spo2 = models.IntegerField(blank=True,null=True)
     sleeping = models.BooleanField(blank=True,null=True)
     processed = models.BooleanField(blank=True,null=True)
+    alarm = models.BooleanField(blank=True,null=True)
     class Meta:
         managed = False
         db_table = 'sensordata'
@@ -210,3 +211,16 @@ class Alarm(models.Model):
     class Meta:
         managed = False
         db_table = 'alarm'
+
+class ActivityLog(models.Model):
+    alarmid = models.CharField(primary_key=True, max_length=45,default=uuid4)
+    staffid = models.CharField(max_length=45, blank=True, null=True)
+    profileid = models.CharField(max_length=45, blank=True, null=True)
+    reminder = models.IntegerField(blank=True, null=True)
+    remindingtime = models.BigIntegerField(blank=True, null=True)
+    respondingtime = models.BigIntegerField(blank=True, null=True)
+    class Meta:
+        managed = False
+        db_table = 'activitylog'
+
+

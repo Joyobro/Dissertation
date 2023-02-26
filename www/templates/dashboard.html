@@ -990,9 +990,9 @@
                         card.find(".stepbox").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
                         card.find(".batterybox").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
 
-                        card.find(".pillsbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"takepill\")")
-                        card.find(".batterybtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"chargebattery\")")
-                        card.find(".walkbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"beactive\")")
+                        card.find(".pillsbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"takepill,n/a\")")
+                        card.find(".batterybtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"chargebattery,n/a\")")
+                        card.find(".walkbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"beactive\""+",\"" + item.alarmid + "\")")
                         card.find(".locatebtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"datasync\")")
                         card.find(".downloadtn").attr("onclick", "downloadcsv(" + "\"" + item.profileid + "\"" + ")")
                         card.find(".mapbox").attr("onclick", "mymap(" + "\"" + item.profileid + "\"" + ")")
@@ -1015,7 +1015,6 @@
                         }
 
                         var wearBtn = card.find(".pillsbtn")
-                        console.log("devicid:"+item.deviceid)
                         var logdate = new Date(item.timestamp);
                         var today = new Date();
                         var diff = Math.abs(today - logdate);
@@ -1028,12 +1027,10 @@
                                 card.find(".hrvalue").text("nw")
                                 card.find(".spo2value").text("nw")
                                 card.find(".batteryvalue").text("nw")
-                                {#wearBtn.removeClass("disabled")#}
                                 wearBtn.attr("interval",setInterval(flash.bind(null, wearBtn,"rgba(245,144,39,0.8"), 400))
                             }
                             else
                             {
-                                {#card.find(".pillsbtn").addClass("disabled")#}
                                 clearInterval(wearBtn.attr("interval"));
                                 wearBtn.css('background-color','rgba(0,0,0,0')
                             }
@@ -1074,6 +1071,17 @@
                                 batterBtn.attr("interval",setInterval(flash.bind(null, batterBtn,"rgba(245,144,39,0.8"), 400))
                             }
 
+                            var alarmBtn = card.find(".walkbtn")
+                            if(item.alarm)
+                            {
+                                alarmBtn.removeClass("disabled")
+                                alarmBtn.attr("interval",setInterval(flash.bind(null, alarmBtn,"rgba(247,19,117,0.8"), 400))
+                            }
+                            else {
+                                alarmBtn.addClass("disabled")
+                                clearInterval(alarmBtn.attr("interval"));
+                                alarmBtn.css('background-color','rgba(0,0,0,0')
+                            }
                             if (!isNaN(minutes)) {
                                 card.find(".updatetime").text("last updated " + minutes + " mins ago")
                             }
@@ -1091,22 +1099,6 @@
                             card.find(".batteryvalue").text('n/a')
                         }
 
-
-                        {#if(item.sleepstart!="n/a")#}
-                        {#{#}
-                        {#    sleepStart = new Date(item.sleepstart)#}
-                        {#    sleepEnd = new Date(item.sleepend)#}
-                        {#    card.find(".sleepduration").text(item.sleepduration+" ("+String(sleepStart.getHours()).padStart(2, '0')+":"+String(sleepStart.getMinutes()).padStart(2, '0')+#}
-                        {#        "-"+String(sleepEnd.getHours()).padStart(2, '0')+":"+String(sleepEnd.getMinutes()).padStart(2, '0')+")")#}
-                        {#}#}
-                        {#else {#}
-                        {#    card.find(".sleepduration").text("Sleep information yet to be updated")#}
-                        {#}#}
-
-
-
-
-
                         $("#carddeck").append(card)
                     });
 
@@ -1122,11 +1114,11 @@
         getcards()
     }, 60000*3);
 
-    function datasync(profileid, action) {
+    function datasync(profileid, action,alarmid) {
         $.ajax({
             type: "GET",
             headers: {"X-CSRFToken": token},
-            url: "{% url 'service:notification' %}?profileid=" + profileid + "&action=" + action,
+            url: "{% url 'service:notification' %}?profileid=" + profileid + "&action=" + action+"&alarmid=" + alarmid+"&staffid="+"{{ user }}",
             success: function (result) {
                 if (result.status == "success") {
                     if (action == "datasync") {
@@ -1159,12 +1151,18 @@
         location.href = "{% url 'service:downloadcsv' %}?profileid=" + profileid
     }
 
+    var hrchart,spo2chart,stepchart,batterychart;
 
     function chart(profileid) {
         var hrctx = document.getElementById('hrchart').getContext('2d');
         hrctx.canvas.width = 2000;
         hrctx.canvas.height = 550;
-        var hrchart = new Chart(hrctx, cfg);
+        if (hrchart!=undefined)
+        {
+            hrchart.destroy();
+        }
+        hrchart = new Chart(hrctx, cfg);
+
         var hrdataset = hrchart.config.data.datasets[0];
         hrdataset.type = "line";
         var hrdata = []
@@ -1172,7 +1170,13 @@
         var spo2ctx = document.getElementById('spo2chart').getContext('2d');
         spo2ctx.canvas.width = 2000;
         spo2ctx.canvas.height = 550;
-        var spo2chart = new Chart(spo2ctx, cfg_spo2);
+        if (spo2chart!=undefined)
+        {
+            spo2chart.destroy();
+        }
+        spo2chart = new Chart(spo2ctx, cfg_spo2);
+
+
         var spo2dataset = spo2chart.config.data.datasets[0];
         spo2dataset.type = "line";
         var spo2data = []
@@ -1180,16 +1184,25 @@
         var stepctx = document.getElementById('stepchart').getContext('2d');
         stepctx.canvas.width = 2000;
         stepctx.canvas.height = 550;
-        var stepchart = new Chart(stepctx, cfg1);
+        if (stepchart!=undefined)
+        {
+            stepchart.destroy();
+        }
+        stepchart = new Chart(stepctx, cfg1);
+
         var stepdataset = stepchart.config.data.datasets[0];
         stepdataset.type = "bar";
         var stepdata = []
 
-
         var batteryctx = document.getElementById('batterychart').getContext('2d');
         batteryctx.canvas.width = 2000;
         batteryctx.canvas.height = 550;
-        var batterychart = new Chart(batteryctx, cfg2);
+        if (batterychart!=undefined)
+        {
+            batterychart.destroy();
+        }
+        batterychart = new Chart(batteryctx, cfg2);
+
         var batterydataset = batterychart.config.data.datasets[0];
         batterydataset.type = "line";
         var batterydata = []
@@ -1200,30 +1213,36 @@
             url: "{% url 'service:sensordata' %}?profileid=" + profileid,
             success: function (result) {
                 if (result.status == "success") {
+
                     var items = result.data
+                    max_hr = 0
+                    min_hr = 200
+                    max_rr = 0
+                    min_rr = 200
                     items.forEach(function (item, index) {
-                        hrdata.push({"x": item.timestamp, "y": item.hr})
-                        spo2data.push({"x": item.timestamp, "y": item.spo2})
+                        if (item.hr>0){
+                            if (item.hr>max_hr){max_hr = item.hr}
+                            if(item.hr<min_hr){min_hr = item.hr}
+                            hrdata.push({"x": item.timestamp, "y": item.hr})
+                        }
+
+                        if (item.spo2>0){
+                            if (item.spo2>max_rr){max_rr = item.spo2}
+                            if(item.spo2<min_rr){min_rr = item.spo2}
+                            spo2data.push({"x": item.timestamp, "y": item.spo2})
+                        }
                         stepdata.push({"t": item.timestamp, "y": item.step})
                         batterydata.push({"x": item.timestamp, "y": item.battery})
                     })
 
-                    {#for (i=0;i<hrdata.length;i++)#}
-                    {#{#}
-	                {#//console.log(hrdata[i])#}
-                    {#    if (hrdata[i]!=undefined && hrdata[i].y<40)#}
-                    {#    {#}
-			        {#        if(hrdata[i]!=undefined&&hrdata[i-1]!=undefined&&hrdata[i+1]!=undefined)#}
-                    {#        {#}
-                    {#            hrdata[i].y = parseInt((hrdata[i+1].y+hrdata[i-1].y)/2)#}
-		            {#        }#}
-                    {#    }#}
-                    {#}#}
-
-                    hrdataset.data = hrdata
+                    hrdataset.data = hrdata;
+                    hrchart.options.scales.yAxes[0].ticks.max = max_hr+5;
+                    hrchart.options.scales.yAxes[0].ticks.min = min_hr-5;
                     hrchart.update();
 
-                    spo2dataset.data = spo2data
+                    spo2dataset.data = spo2data;
+                    spo2chart.options.scales.yAxes[0].ticks.max = max_rr+5;
+                    spo2chart.options.scales.yAxes[0].ticks.min = min_rr-5;
                     spo2chart.update();
 
                     stepdataset.data = stepdata
@@ -1231,7 +1250,6 @@
 
                     batterydataset.data = batterydata
                     batterychart.update();
-
 
                     $("#chartmodal").modal()
 
