@@ -12,7 +12,7 @@ window.chartColors = {
 var cfg = {
     data: {
         datasets: [{
-            label: 'Heart Rate',
+
             backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
             borderColor: window.chartColors.red,
             data: [],
@@ -25,6 +25,9 @@ var cfg = {
         }]
     },
     options: {
+        legend: {
+            display: false
+        },
         animation: {
             duration: 2
         },
@@ -59,7 +62,7 @@ var cfg = {
                 ticks: {
                     min: 30,    // minimum will be 0, unless there is a lower value.
                     max: 180,
-                    stepSize: 30
+                    stepSize: 10
                 }
             }]
         },
@@ -83,7 +86,7 @@ var cfg = {
 var cfg_spo2 = {
     data: {
         datasets: [{
-            label: 'Respiratory Rate',
+
             backgroundColor: color(window.chartColors.green).alpha(0.5).rgbString(),
             borderColor: window.chartColors.green,
             data: [],
@@ -96,6 +99,9 @@ var cfg_spo2 = {
         }]
     },
     options: {
+        legend: {
+            display: false
+        },
         animation: {
             duration: 2
         },
@@ -128,7 +134,7 @@ var cfg_spo2 = {
                 autoSkip: true,
                 autoSkipPadding: 15,
                 ticks: {
-                    stepSize: 10,
+                    stepSize: 0.1,
                     suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
                     suggestedMax: 30   // minimum value will be 0.
                 }
@@ -154,7 +160,7 @@ var cfg_spo2 = {
 var cfg1 = {
     data: {
         datasets: [{
-            label: 'Activity (Steps)',
+
             backgroundColor: color(window.chartColors.blue).alpha(0.8).rgbString(),
             borderColor: window.chartColors.blue,
             data: [],
@@ -166,6 +172,9 @@ var cfg1 = {
         }]
     },
     options: {
+        legend: {
+            display: false
+        },
         animation: {
             duration: 0
         },
@@ -220,7 +229,7 @@ var cfg1 = {
 var cfg2 = {
     data: {
         datasets: [{
-            label: 'Battery Usage',
+
             backgroundColor: color(window.chartColors.orange).alpha(0.5).rgbString(),
             borderColor: window.chartColors.orange,
             data: [],
@@ -233,6 +242,9 @@ var cfg2 = {
         }]
     },
     options: {
+        legend: {
+            display: false
+        },
         animation: {
             duration: 2
         },

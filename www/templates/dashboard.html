@@ -922,9 +922,9 @@
             "                               <div class=\"row col\">" +
             "                               <a  class=\"btn pillsbtn btn-outline-secondary btn-sm btn-pills disabled" +
             "                                                          waves-effect waves-themed\" blinking=\"true\" interval=\"0\"><i class=\"fal fa-unlink\"></i></a>" +
-            "                               <a  class=\" btn batterybtn btn-outline-secondary btn-sm btn-pills disabled " +
-            "                                                        waves-effect waves-themed\" blinking=\"true\" interval=\"0\"><i class=\"fal fa-battery-bolt\"></i></a>" +
-            "                               <a  class=\"btn walkbtn btn-outline-secondary btn-sm btn-pills disabled" +
+            "                               <a  class=\" btn batterybtn btn-outline-secondary btn-sm btn-pills " +
+            "                                                        waves-effect waves-themed  disabled\" blinking=\"true\" interval=\"0\"><i class=\"fal fa-battery-bolt\"></i></a>" +
+            "                               <a  class=\"btn walkbtn btn-outline-secondary btn-sm btn-pills" +
             "                                                          waves-effect waves-themed\" blinking=\"true\" interval=\"0\"><i class=\"fal fa-exclamation\"></i></a>" +
             "                                </div>" +
             "                               <div class=\"row col\">" +
@@ -1035,7 +1035,7 @@
                                 wearBtn.css('background-color','rgba(0,0,0,0')
                             }
                             card.find(".hrvalue").text(item.hr)
-                            card.find(".spo2value").text(item.spo2)
+                            card.find(".spo2value").text(parseFloat(item.spo2).toFixed(2))
                             card.find(".stepvalue").text(item.step)
                             card.find(".batteryvalue").text(item.battery)
 
@@ -1045,7 +1045,7 @@
                                 card.find(".stepvalue").text("charging")
                                 card.find(".hrvalue").text("charging")
                                 card.find(".spo2value").text("charging")
-                                card.find(".batteryvalue").text("charging")
+
                                 batterBtn.addClass("disabled")
                                 clearInterval(batterBtn.attr("interval"));
                                 batterBtn.css('background-color','rgba(0,0,0,0')
@@ -1060,14 +1060,14 @@
                                 batterBtn.addClass("disabled")
                                 clearInterval(batterBtn.attr("interval"));
                                 batterBtn.css('background-color','rgba(0,0,0,0')
-                            } else if (item.battery < 60 && item.battery >= 25) {
+                            } else if (item.battery < 60 && item.battery >= 10) {
                                 card.find(".batteryimg").attr("src", "{% static 'img/battery-status-mid.png' %}")
                                 batterBtn.addClass("disabled")
                                 clearInterval(batterBtn.attr("interval"));
                                 batterBtn.css('background-color','rgba(0,0,0,0')
-                            } else if (item.battery < 25) {
+                            } else if (item.battery < 10) {
                                 card.find(".batteryimg").attr("src", "{% static 'img/battery-status-low.png' %}")
-                                batterBtn.removeClass("disabled")
+                                {#batterBtn.removeClass("disabled")#}
                                 batterBtn.attr("interval",setInterval(flash.bind(null, batterBtn,"rgba(245,144,39,0.8"), 400))
                             }
 
@@ -1086,6 +1086,7 @@
                                 card.find(".updatetime").text("last updated " + minutes + " mins ago")
                             }
                             else {
+                                card.addClass("disabled")
                                 card.find(".updatetime").text("No data available")
                             }
 
@@ -1097,6 +1098,7 @@
                             card.find(".spo2value").text('n/a')
                             card.find(".stepvalue").text('n/a')
                             card.find(".batteryvalue").text('n/a')
+                            card.addClass("disabled")
                         }
 
                         $("#carddeck").append(card)
@@ -1219,11 +1221,18 @@
                     min_hr = 200
                     max_rr = 0
                     min_rr = 200
+                    min_timestamp = 2000000000000
+                    max_timestamp = 0
                     items.forEach(function (item, index) {
+                        console.log(item.hr)
                         if (item.hr>0){
                             if (item.hr>max_hr){max_hr = item.hr}
                             if(item.hr<min_hr){min_hr = item.hr}
                             hrdata.push({"x": item.timestamp, "y": item.hr})
+                        }
+                        else if(item.hr==null)
+                        {
+                            hrdata.push({"x": item.timestamp, "y": 0})
                         }
 
                         if (item.spo2>0){
@@ -1231,24 +1240,48 @@
                             if(item.spo2<min_rr){min_rr = item.spo2}
                             spo2data.push({"x": item.timestamp, "y": item.spo2})
                         }
+                        else if(item.spo2==null)
+                        {
+                            spo2data.push({"x": item.timestamp, "y": 0})
+                        }
                         stepdata.push({"t": item.timestamp, "y": item.step})
                         batterydata.push({"x": item.timestamp, "y": item.battery})
+                        if(item.timestamp>max_timestamp)
+                        {
+                            max_timestamps = item.timestamp
+                        }
+
+                        if(item.timestamp<min_timestamp)
+                        {
+                            min_timestamp = item.timelineTime
+                        }
+
                     })
 
                     hrdataset.data = hrdata;
                     hrchart.options.scales.yAxes[0].ticks.max = max_hr+5;
                     hrchart.options.scales.yAxes[0].ticks.min = min_hr-5;
+
+                    hrchart.options.scales.xAxes[0].ticks.max = max_timestamp
+                    hrchart.options.scales.xAxes[0].ticks.min = min_timestamp
                     hrchart.update();
 
                     spo2dataset.data = spo2data;
-                    spo2chart.options.scales.yAxes[0].ticks.max = max_rr+5;
-                    spo2chart.options.scales.yAxes[0].ticks.min = min_rr-5;
+                    spo2chart.options.scales.yAxes[0].ticks.max = max_rr+0.1;
+                    spo2chart.options.scales.yAxes[0].ticks.min = min_rr-0.1;
+
+                    spo2chart.options.scales.xAxes[0].ticks.max = max_timestamp
+                    spo2chart.options.scales.xAxes[0].ticks.min = min_timestamp
                     spo2chart.update();
 
                     stepdataset.data = stepdata
+                    stepchart.options.scales.xAxes[0].ticks.max = max_timestamp
+                    stepchart.options.scales.xAxes[0].ticks.min = min_timestamp
                     stepchart.update();
 
                     batterydataset.data = batterydata
+                    batterychart.options.scales.xAxes[0].ticks.max = max_timestamp
+                    batterychart.options.scales.xAxes[0].ticks.min = min_timestamp
                     batterychart.update();
 
                     $("#chartmodal").modal()

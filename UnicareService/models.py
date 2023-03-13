@@ -190,7 +190,7 @@ class Sensordata(models.Model):
     stress = models.FloatField(blank=True,null=True)
     bloodpressure = models.TextField(blank=True,null=True)
     ppg = models.TextField(blank=True,null=True)
-    spo2 = models.IntegerField(blank=True,null=True)
+    spo2 = models.FloatField(blank=True,null=True)
     sleeping = models.BooleanField(blank=True,null=True)
     processed = models.BooleanField(blank=True,null=True)
     alarm = models.BooleanField(blank=True,null=True)
