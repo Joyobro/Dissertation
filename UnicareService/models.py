@@ -194,6 +194,7 @@ class Sensordata(models.Model):
     sleeping = models.BooleanField(blank=True,null=True)
     processed = models.BooleanField(blank=True,null=True)
     alarm = models.BooleanField(blank=True,null=True)
+    label = models.TextField(blank=True,null=True)
     class Meta:
         managed = False
         db_table = 'sensordata'

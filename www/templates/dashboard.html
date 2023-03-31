@@ -468,7 +468,7 @@
                     <h1 class="subheader-title">
                         <i class='subheader-icon fal fa-chart-bar'></i> Care Dashboard
                         <small>
-                            Latest Status of Elderly
+                            Latest Status of Your People
                         </small>
                     </h1>
                 </div>
@@ -869,6 +869,48 @@
         </div>
     </div>
 </div>
+
+<div id="sleepchartmodal" class="modal fade" tabindex="-1"
+     role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog  modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="text-align: center">
+                <h4 >Last Night's Sleep</h4>
+                <button id="sleepclosebutton" type="button" class="close" aria-label="Close">
+                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body" id="sleepchartpanel">
+                <h1  id='total_sleep_duration' style="text-align: center">6h 35m</h1>
+                <div class="row" style="align-self: center">
+                    <div class="col-3">
+                        <div class="row"><div class="d-block bg-danger-50 height-1 width-1" style="margin-right:5px;"></div>Awake</div>
+                        <div class="row"><div class="d-block bg-danger-50 height-1 width-1" style="margin-right:5px;"></div><div id="awakePert" style="margin-top: 0px">4%</div></div>
+                        <div class="row"><div class="d-block bg-danger-50 height-1 width-1" style="margin-right:5px;"></div><div id="awakeTime" style="margin-top: 0px">13m</div></div>
+                    </div>
+                    <div class="col-3">
+                        <div class="row"><div class="d-block bg-info-50 height-1 width-1" style="margin-right:5px;"></div>REM</div>
+                        <div class="row"><div class="d-block bg-info-50 height-1 width-1" style="margin-right:5px;"></div><div id="remPert">4%</div></div>
+                        <div class="row"><div class="d-block bg-info-50 height-1 width-1" style="margin-right:5px;"></div><div id="remTime">13m</div></div>
+                    </div>
+                    <div class="col-3">
+                        <div class="row"><div class="d-block bg-info-500 height-1 width-1" style="margin-right:5px;"></div>Light</div>
+                        <div class="row"><div class="d-block bg-info-500 height-1 width-1" style="margin-right:5px;"></div><div id="lightPert">4%</div></div>
+                        <div class="row"><div class="d-block bg-info-500 height-1 width-1" style="margin-right:5px;"></div><div id="lightTime">13m</div></div>
+                    </div>
+                    <div class="col-3">
+                        <div class="row"><div class="d-block bg-info-900 height-1 width-1" style="margin-right:5px;"></div>Deep</div>
+                        <div class="row"><div class="d-block bg-info-900 height-1 width-1" style="margin-right:5px;"></div><div id="deepPert">4%</div></div>
+                        <div class="row"><div class="d-block bg-info-900 height-1 width-1" style="margin-right:5px;"></div><div id="deepTime">13m</div></div>
+                    </div>
+                </div>
+                <canvas id="sleepchart" style="margin-top: 20px"></canvas>
+            </div>
+
+        </div>
+    </div>
+</div>
 <script src="{% static  'js/vendors.bundle.js' %}"></script>
 <script src="{% static 'js/app.bundle.js' %}"></script>
 <script src="{% static 'js/unicare/utils.js' %}"></script>
@@ -932,8 +974,8 @@
             "                                                        waves-effect waves-themed\"><i class=\"fal fa-sync\"></i></a>" +
             "                               <a  class=\"btn downloadtn btn-outline-secondary btn-sm btn-pills " +
             "                                                          waves-effect waves-themed\"><i class=\"fal fa-download\"></i></a>" +
-            "                               <a  class=\"btn annotatetn btn-outline-secondary btn-sm btn-pills " +
-            "                                                          waves-effect waves-themed\"><i class=\"fal fa-pen\"></i></a>" +
+            "                               <a  class=\"btn sleeptn btn-outline-secondary btn-sm btn-pills " +
+            "                                                          waves-effect waves-themed\"><i class=\"fal fa-bed\"></i></a>" +
             "                                </div>" +
             "                             </div>\n" +
             "                            <div class=\"job updatetime\">Last Updated:10 mins ago\n" +
@@ -990,11 +1032,13 @@
                         card.find(".stepbox").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
                         card.find(".batterybox").attr("onclick", "chart(" + "\"" + item.profileid + "\"" + ")")
 
+
                         card.find(".pillsbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"takepill,n/a\")")
                         card.find(".batterybtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"chargebattery,n/a\")")
                         card.find(".walkbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"beactive\""+",\"" + item.alarmid + "\")")
                         card.find(".locatebtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"datasync\")")
                         card.find(".downloadtn").attr("onclick", "downloadcsv(" + "\"" + item.profileid + "\"" + ")")
+                        card.find(".sleeptn").attr("onclick", "sleepChart(" + "\"" + item.profileid + "\"" + ")")
                         card.find(".mapbox").attr("onclick", "mymap(" + "\"" + item.profileid + "\"" + ")")
 
                         card.find(".peoplename").text(item.name)
@@ -1153,7 +1197,52 @@
         location.href = "{% url 'service:downloadcsv' %}?profileid=" + profileid
     }
 
-    var hrchart,spo2chart,stepchart,batterychart;
+    var hrchart,spo2chart,stepchart,batterychart,sleepchart;
+
+    function sleepChart(profileid)
+    {
+        var sleepctx = document.getElementById('sleepchart').getContext('2d');
+        sleepctx.canvas.width = 2000;
+        sleepctx.canvas.height = 1500;
+        if (sleepchart!=undefined)
+        {
+            sleepchart.destroy();
+        }
+        sleepchart = new Chart(sleepctx, sleepcfg);
+        var sleepdataset = sleepchart.config.data.datasets[0];
+        var sleepdata = []
+
+        $.ajax({
+            type: "GET",
+            headers: {"X-CSRFToken": token},
+            url: "{% url 'service:sleep' %}?profileid=" + profileid,
+            success: function (result) {
+                if (result.status == "success") {
+
+                    var items = result.data.datapoints
+                    var total_sleep = result.data.total_sleep
+                    $("#total_sleep_duration").text( Math.floor(total_sleep / 60)+"h "+Math.ceil(total_sleep%60)+"m")
+                    $("#awakePert").text(Math.floor(result.data.total_awake*100)+"%")
+                    $("#awakeTime").text(Math.floor(result.data.total_awake*total_sleep/60)+"h "+Math.floor(result.data.total_awake*total_sleep%60)+"m")
+                    $("#remPert").text(Math.floor(result.data.total_rem*100)+"%")
+                    $("#remTime").text(Math.floor(result.data.total_rem*total_sleep/60)+"h "+Math.floor(result.data.total_rem*total_sleep%60)+"m")
+                    $("#lightPert").text(Math.floor(result.data.total_light*100)+"%")
+                    $("#lightTime").text(Math.floor(result.data.total_light*total_sleep/60)+"h "+Math.floor(result.data.total_light*total_sleep%60)+"m")
+                    $("#deepPert").text(Math.floor(result.data.total_deep*100)+"%")
+                    $("#deepTime").text(Math.floor(result.data.total_deep*total_sleep/60)+"h "+Math.floor(result.data.total_deep*total_sleep%60)+"m")
+                    items.forEach(function (item, index) {
+                        sleepdata.push({"x": parseInt(item[0]), "y": item[1]})
+                    })
+                    sleepdataset.data = sleepdata;
+                    sleepchart.update();
+
+                    $("#sleepchartmodal").modal()
+
+                }
+            }
+        })
+
+    }
 
     function chart(profileid) {
         var hrctx = document.getElementById('hrchart').getContext('2d');
@@ -1224,7 +1313,6 @@
                     min_timestamp = 2000000000000
                     max_timestamp = 0
                     items.forEach(function (item, index) {
-                        console.log(item.hr)
                         if (item.hr>0){
                             if (item.hr>max_hr){max_hr = item.hr}
                             if(item.hr<min_hr){min_hr = item.hr}
@@ -1336,6 +1424,10 @@
 
     $("#chartclosebutton").on("click", () => {
         $("#chartmodal").modal("hide")
+    })
+
+    $("#sleepclosebutton").on("click", () => {
+        $("#sleepchartmodal").modal("hide")
     })
 
     $(document).ready(function () {

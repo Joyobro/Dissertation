@@ -297,3 +297,77 @@ var cfg2 = {
         }
     }
 };
+
+var sleepcfg = {
+    data: {
+        yLabels: ['Deep','Light','REM','Awake'],
+        datasets: [{
+
+            backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+            borderColor: window.chartColors.red,
+            data: [],
+            type: 'scatter',
+            showLine: false,
+            pointRadius: 2,
+            borderWidth: 0,
+            fill: false,
+            lineTension: 0
+        }]
+    },
+    options: {
+        legend: {
+            display: false
+        },
+        animation: {
+            duration: 2
+        },
+        scales: {
+            xAxes: [{
+                type: 'time',
+                distribution: 'series',
+                gridLines: {
+                    display:false
+                },
+
+                ticks: {
+                    major: {
+                        enabled: true,
+                        fontStyle: 'bold'
+                    },
+                    source: 'data',
+                    autoSkip: true,
+                    autoSkipPadding: 75,
+                    maxRotation: 0,
+                    sampleSize: 100
+                },
+
+            }],
+            yAxes: [{
+                gridLines: {
+                    display:false
+                },
+                scaleLabel: {
+                    display: false,
+                },
+                type: 'category',
+                ticks: {
+                    reverse: true
+                }
+            }]
+        },
+        tooltips: {
+            intersect: false,
+            mode: 'index',
+            callbacks: {
+                label: function (tooltipItem, myData) {
+                    var label = myData.datasets[tooltipItem.datasetIndex].label || '';
+                    if (label) {
+                        label += ': ';
+                    }
+                    label += parseFloat(tooltipItem.value).toFixed(2);
+                    return label;
+                }
+            }
+        }
+    }
+};

@@ -9,8 +9,9 @@ from django.views.decorators.csrf import csrf_exempt
 from UnicareService.utils.utils import POST
 from UnicareService.health.HeartRate import HeartRate
 # from UnicareService.health.HREstimator import HREstimator
-# from UnicareService.health.SleepAnalizer import SleepAnalizer
+from UnicareService.health.SleepAnalizer import SleepAnalizer
 import numpy as np
+from twilio.rest import Client
 
 import traceback
 def organisations(request):
@@ -312,6 +313,24 @@ def gpsdata(request):
         return JsonResponse({"status": "success", "data": result}, safe=False)
 
 @csrf_exempt
+def sleep(request):
+    if (request.method=="GET"):
+        profileid = request.GET["profileid"]
+        if("hours" in request.GET.keys()):
+            hours = int(request.GET["hours"])
+        else:
+            hours = 24
+        # today = datetime.now().date()
+        today = datetime.now()
+        today = today.replace(hour=12,minute=0)
+        start = today - timedelta(hours = hours)#datetime(today.year, today.month, today.day, today.hour-8)
+        sensordata = Sensordata.objects.filter(profileid=profileid,
+                                               timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("timestamp","hr","step","battery","spo2","ppg","status");
+        sensordata = list(sensordata)
+        sleep_block = SleepAnalizer(5).process_signal(sensordata)
+        return JsonResponse({"status":"success","data": sleep_block}, safe=False)
+
+@csrf_exempt
 def sensordata(request):
     if(request.method=="POST"):
         try:
@@ -323,11 +342,14 @@ def sensordata(request):
             # hm = HREstimator(sample_rate=400)
             for sensor in sensor_data_array:
                 id=sensor["deviceId"]
-                profiles = Profile.objects.filter(deviceid=id).values("id","devicesetup")
+
+                profiles = Profile.objects.filter(deviceid=id).values("id","devicesetup","firstname","lastname")
+
                 if (profiles.exists()):
                     result = profiles[0]
                     ppgData = sensor["ppgData"]
                     accelor = sensor["accBuffer"]
+
                     if len(accelor)>0:
                         a_diff = np.diff(np.array(accelor),axis=0)
                         a_diff = np.sqrt(np.sum(a_diff**2,axis=1))
@@ -335,6 +357,25 @@ def sensordata(request):
                     else:
                         spo2 = None
                     # print(a_diff)
+                    if "label" in sensor.keys():
+                        label = sensor["label"]
+                    else:
+                        label = None
+
+                    if ("alarm" in sensor.keys()):
+                        alarm = sensor["alarm"]
+                        if alarm:
+                            account_sid = "AC2748493ecf2bad0ef5698caf60a7a117"
+                            auth_token = "2083c3cbc5e518f30932f3ff9ff4a57f"
+                            client = Client(account_sid, auth_token)
+                            message = client.messages.create(
+                                body="Alarm has been triggered by "+ result["firstname"]+" "+result["lastname"]+" at "+(datetime.fromtimestamp(sensor['timestamp']/1000.0)).strftime("%d/%m/%Y, %H:%M:%S"),
+                                from_="+15076667198",
+                                to="+447449961860"
+)
+                    else:
+                        alarm = False
+
                     if(len(ppgData)>0):
                         bpms = []
                         rrs = []
@@ -357,32 +398,35 @@ def sensordata(request):
                             new_rr = 0
 
                         # print(new_hr,new_rr)
-                        if new_hr!=0:
-                            hr = new_hr
-                            if (hr<55 or hr>150):
-                                alarm = True
-                            else:
-                                alarm = False
-                        else:
-                            hr = None
-                            alarm = False
-
-                        if new_rr!=0:
-                            rr = new_rr
-                        else:
-                            rr = None
-                            alarm = False
+                        # if new_hr!=0:
+                        #     hr = new_hr
+                        #     if (hr<55 or hr>150):
+                        #         alarm = True
+                        #     else:
+                        #         alarm = False
+                        # else:
+                        #     hr = None
+                        #     alarm = False
+                        # 
+                        # if new_rr!=0:
+                        #     rr = new_rr
+                        # else:
+                        #     rr = None
+                        #     alarm = False
+                        # 
+                        #
                         sensordata = Sensordata(deviceid=id, profileid=result["id"],lat=sensor["lat"], lg=sensor["log"],
                                                 battery=sensor["battery"], step=sensor["step"], ppg=sensor["ppgData"], hr=hr,
                                                 timestamp=sensor["timestamp"],batterystatus=sensor["batteryStatus"],status=sensor["status"],
                                                 accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],
                                                 gyoscope=sensor["gyoBuffer"],stress=0.0,bloodpressure=None,
-                                                spo2=spo2,sleeping=False,processed=False,alarm=alarm)
+                                                spo2=spo2,sleeping=False,processed=False,alarm=alarm,label=label)
                     else:
                         sensordata = Sensordata(deviceid=id, profileid=result["id"],lat=sensor["lat"], lg=sensor["log"],
                                                 battery=sensor["battery"], step=sensor["step"], ppg=None,
                                                 timestamp=sensor["timestamp"],batterystatus=sensor["batteryStatus"],status=sensor["status"],
-                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],gyoscope=sensor["gyoBuffer"],stress=0.0,bloodpressure=None,spo2=spo2,sleeping=False,processed=False,alarm=False)
+                                                accelerometer=sensor["accBuffer"],light=sensor["lightBuffer"],gyoscope=sensor["gyoBuffer"],
+                                                stress=0.0,bloodpressure=None,spo2=spo2,sleeping=False,processed=False,alarm=False,label=label)
                     sensordata.save()
 
                     #alarmtype==0 /notworn
@@ -426,14 +470,14 @@ def sensordata(request):
         else:
             profileid = request.GET["profileid"]
             if("hours" in request.GET.keys()):
-                hours = request.GET["hours"]
+                hours = int(request.GET["hours"])
             else:
                 hours = 12
             # today = datetime.now().date()
             today = datetime.now()
-            start = today - timedelta(hours = 12)#datetime(today.year, today.month, today.day, today.hour-8)
+            start = today - timedelta(hours = hours)#datetime(today.year, today.month, today.day, today.hour-8)
             sensordata = Sensordata.objects.filter(profileid=profileid,
-                                                   timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("timestamp","hr","step","battery","spo2");
+                                                   timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("timestamp","hr","step","battery","spo2","ppg");
             return JsonResponse({"status":"success","data": list(sensordata)}, safe=False)
 
 
