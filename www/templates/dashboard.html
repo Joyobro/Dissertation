@@ -21,13 +21,19 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/favicon/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon/favicon-32x32.png' %}">
     <link rel="mask-icon" href="{% static 'img/favicon/safari-pinned-tab.svg' %}" color="#5bbad5">
-    <link rel="stylesheet" media="screen, print" href="{% static 'css/datagrid/datatables/datatables.bundle.css' %}">
+
     <link rel="stylesheet" media="screen, print" href="{% static 'css/vendors.bundle.css' %}">
     <link rel="stylesheet" media="screen, print" href="{% static 'css/theme-demo.css' %}">
     <link rel="stylesheet" media="screen, print" href="{% static 'css/statistics/chartjs/chartjs.css' %}">
     <link rel="stylesheet" media="screen, print"
           href="{% static 'css/formplugins/bootstrap-datepicker/bootstrap-datepicker.css' %}">
+    <link rel="stylesheet" media="screen, print"
+          href="{% static 'js/datagrid/datatables/datatables.css' %}">
 
+    {#    <link href="https://cdn.datatables.net/v/ju/dt-1.13.4/b-2.3.6/date-1.4.1/r-2.4.1/sb-1.4.2/sp-2.1.2/sl-1.6.2/datatables.min.css" rel="stylesheet"/>#}
+
+
+    {#        <link rel="stylesheet" media="screen, print" href="{% static 'css/datagrid/datatables/datatables.bundle.css' %}">#}
     <style>
         @import url(https://fonts.googleapis.com/css?family=Open+Sans:600,300);
 
@@ -870,39 +876,117 @@
     </div>
 </div>
 
+<div id="annotationmodal" class="modal  fade" tabindex="0"
+     role="dialog"
+     style="display: none;"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Data Labelling</h4>
+                <button id="annotation_modal_close_button" type="button" class="close" aria-label="Close">
+                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body" id="annotationchartpanel">
+                <div class="text-center">
+                    <button type="button" id="annotation_last_hour"
+                            class="col-2  btn btn-xs btn-outline-info waves-effect waves-themed">Last Hour
+                    </button>
+                    <input type="datetime-local" value=""  class='col-4 form-control-sm' id="annotation_datetime_picker"/>
+                    <button type="button" id="annotation_next_hour"
+                            class="col-2  btn btn-xs btn-outline-info waves-effect waves-themed">Next Hour
+                    </button>
+                </div>
+                <canvas id="signalchart"></canvas>
+            </div>
+
+            <div class="row" style="margin: 5pt">
+                <div class="col-sm-12">
+
+                    <table id="annotationtable"
+                           class="table table-bordered table-hover table-striped w-100 dataTable dtr-inline"
+                           role="grid" aria-describedby="dt-basic-example_info" style="width: 1545px;">
+
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>
+
 <div id="sleepchartmodal" class="modal fade" tabindex="-1"
      role="dialog"
      aria-hidden="true">
     <div class="modal-dialog  modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header" style="text-align: center">
-                <h4 >Last Night's Sleep</h4>
+                <h4>Last Night's Sleep</h4>
                 <button id="sleepclosebutton" type="button" class="close" aria-label="Close">
                     <span aria-hidden="true"><i class="fal fa-times"></i></span>
                 </button>
             </div>
             <div class="modal-body" id="sleepchartpanel">
-                <h1  id='total_sleep_duration' style="text-align: center">6h 35m</h1>
+                <h1 class='fw-700' id='total_sleep_duration' style="text-align: center">6h 35m</h1>
+                <h6 class='fw-700' id='total_sleep_period' style="text-align: center">6h 35m</h6>
                 <div class="row" style="align-self: center">
                     <div class="col-3">
-                        <div class="row"><div class="d-block bg-danger-50 height-1 width-1" style="margin-right:5px;"></div>Awake</div>
-                        <div class="row"><div class="d-block bg-danger-50 height-1 width-1" style="margin-right:5px;"></div><div id="awakePert" style="margin-top: 0px">4%</div></div>
-                        <div class="row"><div class="d-block bg-danger-50 height-1 width-1" style="margin-right:5px;"></div><div id="awakeTime" style="margin-top: 0px">13m</div></div>
+                        <div class="row">
+                            <div class="d-block bg-danger-50 height-1 width-1" style="margin-right:5px;"></div>
+                            Awake
+                        </div>
+                        <div class="row">
+                            <div class="d-block bg-danger-50 height-1 width-1" style="margin-right:5px;"></div>
+                            <div id="awakePert" style="margin-top: 0px">n/a</div>
+                        </div>
+                        <div class="row">
+                            <div class="d-block bg-danger-50 height-1 width-1" style="margin-right:5px;"></div>
+                            <div id="awakeTime" style="margin-top: 0px">n/a</div>
+                        </div>
                     </div>
                     <div class="col-3">
-                        <div class="row"><div class="d-block bg-info-50 height-1 width-1" style="margin-right:5px;"></div>REM</div>
-                        <div class="row"><div class="d-block bg-info-50 height-1 width-1" style="margin-right:5px;"></div><div id="remPert">4%</div></div>
-                        <div class="row"><div class="d-block bg-info-50 height-1 width-1" style="margin-right:5px;"></div><div id="remTime">13m</div></div>
+                        <div class="row">
+                            <div class="d-block bg-info-50 height-1 width-1" style="margin-right:5px;"></div>
+                            Light
+                        </div>
+                        <div class="row">
+                            <div class="d-block bg-info-50 height-1 width-1" style="margin-right:5px;"></div>
+                            <div id="lightPert">n/a</div>
+                        </div>
+                        <div class="row">
+                            <div class="d-block bg-info-50 height-1 width-1" style="margin-right:5px;"></div>
+                            <div id="lightTime">n/a</div>
+                        </div>
                     </div>
                     <div class="col-3">
-                        <div class="row"><div class="d-block bg-info-500 height-1 width-1" style="margin-right:5px;"></div>Light</div>
-                        <div class="row"><div class="d-block bg-info-500 height-1 width-1" style="margin-right:5px;"></div><div id="lightPert">4%</div></div>
-                        <div class="row"><div class="d-block bg-info-500 height-1 width-1" style="margin-right:5px;"></div><div id="lightTime">13m</div></div>
+                        <div class="row">
+                            <div class="d-block bg-info-500 height-1 width-1" style="margin-right:5px;"></div>
+                            REM
+                        </div>
+                        <div class="row">
+                            <div class="d-block bg-info-500 height-1 width-1" style="margin-right:5px;"></div>
+                            <div id="remPert">n/a</div>
+                        </div>
+                        <div class="row">
+                            <div class="d-block bg-info-500 height-1 width-1" style="margin-right:5px;"></div>
+                            <div id="remTime">n/a</div>
+                        </div>
                     </div>
                     <div class="col-3">
-                        <div class="row"><div class="d-block bg-info-900 height-1 width-1" style="margin-right:5px;"></div>Deep</div>
-                        <div class="row"><div class="d-block bg-info-900 height-1 width-1" style="margin-right:5px;"></div><div id="deepPert">4%</div></div>
-                        <div class="row"><div class="d-block bg-info-900 height-1 width-1" style="margin-right:5px;"></div><div id="deepTime">13m</div></div>
+                        <div class="row">
+                            <div class="d-block bg-info-900 height-1 width-1" style="margin-right:5px;"></div>
+                            Deep
+                        </div>
+                        <div class="row">
+                            <div class="d-block bg-info-900 height-1 width-1" style="margin-right:5px;"></div>
+                            <div id="deepPert">n/a</div>
+                        </div>
+                        <div class="row">
+                            <div class="d-block bg-info-900 height-1 width-1" style="margin-right:5px;"></div>
+                            <div id="deepTime">n/a</div>
+                        </div>
                     </div>
                 </div>
                 <canvas id="sleepchart" style="margin-top: 20px"></canvas>
@@ -914,12 +998,17 @@
 <script src="{% static  'js/vendors.bundle.js' %}"></script>
 <script src="{% static 'js/app.bundle.js' %}"></script>
 <script src="{% static 'js/unicare/utils.js' %}"></script>
-<script src="{% static 'js/datagrid/datatables/datatables.bundle.js' %}"></script>
+{#<script src="{% static 'js/datagrid/datatables/datatables.bundle.js' %}"></script>#}
 <script src="{% static 'js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js' %}"></script>
 <script src="{% static 'js/statistics/chartjs/Chart.bundle.js' %}"></script>
 <script src="{% static 'js/app/chartconfig.js' %}"></script>
-
 <script type="text/javascript" src="https://js.ideal-postcodes.co.uk/postcodes-3.0.7.min.js"></script>
+{#<script src = "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"/>#}
+{#<script src = "https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"/>#}
+{#<script src="https://cdn.datatables.net/v/ju/dt-1.13.4/b-2.3.6/date-1.4.1/r-2.4.1/sb-1.4.2/sp-2.1.2/sl-1.6.2/datatables.min.js"></script>#}
+<script src="{% static 'js/datagrid/datatables/datatables.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"/>
+
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8XJndAk1NtITTAfSZ26qOAGxHqacgUUU"></script>
 
 <script>
@@ -931,16 +1020,13 @@
 
     var blinking = false;
 
-    function flash(element,rgbaColor) {
+    function flash(element, rgbaColor) {
         var color = element.css("background-color")
         {#"rgba(245,40,145,0.8)"#}
-        if (color=='rgba(0, 0, 0, 0)')
-        {
-            element.css("background-color",rgbaColor)
-        }
-        else
-        {
-            element.css("background-color","rgba(0,0,0,0)")
+        if (color == 'rgba(0, 0, 0, 0)') {
+            element.css("background-color", rgbaColor)
+        } else {
+            element.css("background-color", "rgba(0,0,0,0)")
         }
     }
 
@@ -976,6 +1062,8 @@
             "                                                          waves-effect waves-themed\"><i class=\"fal fa-download\"></i></a>" +
             "                               <a  class=\"btn sleeptn btn-outline-secondary btn-sm btn-pills " +
             "                                                          waves-effect waves-themed\"><i class=\"fal fa-bed\"></i></a>" +
+            "                               <a  class=\"btn annotationbtn btn-outline-secondary btn-sm btn-pills " +
+            "                                                          waves-effect waves-themed\"><i class=\"fal fa-pen\"></i></a>" +
             "                                </div>" +
             "                             </div>\n" +
             "                            <div class=\"job updatetime\">Last Updated:10 mins ago\n" +
@@ -1035,10 +1123,11 @@
 
                         card.find(".pillsbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"takepill,n/a\")")
                         card.find(".batterybtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"chargebattery,n/a\")")
-                        card.find(".walkbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"beactive\""+",\"" + item.alarmid + "\")")
+                        card.find(".walkbtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"beactive\"" + ",\"" + item.alarmid + "\")")
                         card.find(".locatebtn").attr("onclick", "datasync(" + "\"" + item.profileid + "\"" + ",\"datasync\")")
                         card.find(".downloadtn").attr("onclick", "downloadcsv(" + "\"" + item.profileid + "\"" + ")")
                         card.find(".sleeptn").attr("onclick", "sleepChart(" + "\"" + item.profileid + "\"" + ")")
+                        card.find(".annotationbtn").attr("onclick", "annoChart(" + "\"" + item.profileid + "\"" + ")")
                         card.find(".mapbox").attr("onclick", "mymap(" + "\"" + item.profileid + "\"" + ")")
 
                         card.find(".peoplename").text(item.name)
@@ -1049,12 +1138,10 @@
                             card.find(".profileimg").attr("src", "{% static 'img/demo_women.jpg' %}")
                         }
 
-                       
-		                if (item.age > 90) {
+
+                        if (item.age > 90) {
                             card.find(".profileimg").attr("src", "{% static 'img/demo_women1.jpg' %}")
-                        }
-                        else if (item.age == 68)
-                        {
+                        } else if (item.age == 68) {
                             card.find(".profileimg").attr("src", "{% static 'img/demo_lady.jpg' %}")
                         }
 
@@ -1064,19 +1151,16 @@
                         var diff = Math.abs(today - logdate);
                         var minutes = Math.floor((diff / 1000) / 60);
 
-                        if(item.deviceid!=null)
-                        {
-                            if (item.status == "notworn" && item.batterystatus==0) {
+                        if (item.deviceid != null) {
+                            if (item.status == "notworn" && item.batterystatus == 0) {
                                 card.find(".stepvalue").text("nw")
                                 card.find(".hrvalue").text("nw")
                                 card.find(".spo2value").text("nw")
                                 card.find(".batteryvalue").text("nw")
-                                wearBtn.attr("interval",setInterval(flash.bind(null, wearBtn,"rgba(245,144,39,0.8"), 400))
-                            }
-                            else
-                            {
+                                wearBtn.attr("interval", setInterval(flash.bind(null, wearBtn, "rgba(245,144,39,0.8"), 400))
+                            } else {
                                 clearInterval(wearBtn.attr("interval"));
-                                wearBtn.css('background-color','rgba(0,0,0,0')
+                                wearBtn.css('background-color', 'rgba(0,0,0,0')
                             }
                             card.find(".hrvalue").text(item.hr)
                             card.find(".spo2value").text(parseFloat(item.spo2).toFixed(2))
@@ -1092,51 +1176,47 @@
 
                                 batterBtn.addClass("disabled")
                                 clearInterval(batterBtn.attr("interval"));
-                                batterBtn.css('background-color','rgba(0,0,0,0')
+                                batterBtn.css('background-color', 'rgba(0,0,0,0')
 
                             } else if (item.battery >= 85) {
                                 card.find(".batteryimg").attr("src", "{% static 'img/battery-status-full.png' %}")
                                 batterBtn.addClass("disabled")
                                 clearInterval(batterBtn.attr("interval"));
-                                batterBtn.css('background-color','rgba(0,0,0,0')
+                                batterBtn.css('background-color', 'rgba(0,0,0,0')
                             } else if (item.battery < 85 && item.battery >= 60) {
                                 card.find(".batteryimg").attr("src", "{% static 'img/battery-status-ok.png' %}")
                                 batterBtn.addClass("disabled")
                                 clearInterval(batterBtn.attr("interval"));
-                                batterBtn.css('background-color','rgba(0,0,0,0')
+                                batterBtn.css('background-color', 'rgba(0,0,0,0')
                             } else if (item.battery < 60 && item.battery >= 10) {
                                 card.find(".batteryimg").attr("src", "{% static 'img/battery-status-mid.png' %}")
                                 batterBtn.addClass("disabled")
                                 clearInterval(batterBtn.attr("interval"));
-                                batterBtn.css('background-color','rgba(0,0,0,0')
+                                batterBtn.css('background-color', 'rgba(0,0,0,0')
                             } else if (item.battery < 10) {
                                 card.find(".batteryimg").attr("src", "{% static 'img/battery-status-low.png' %}")
                                 {#batterBtn.removeClass("disabled")#}
-                                batterBtn.attr("interval",setInterval(flash.bind(null, batterBtn,"rgba(245,144,39,0.8"), 400))
+                                batterBtn.attr("interval", setInterval(flash.bind(null, batterBtn, "rgba(245,144,39,0.8"), 400))
                             }
 
                             var alarmBtn = card.find(".walkbtn")
-                            if(item.alarm)
-                            {
+                            if (item.alarm) {
                                 alarmBtn.removeClass("disabled")
-                                alarmBtn.attr("interval",setInterval(flash.bind(null, alarmBtn,"rgba(247,19,117,0.8"), 400))
-                            }
-                            else {
+                                alarmBtn.attr("interval", setInterval(flash.bind(null, alarmBtn, "rgba(247,19,117,0.8"), 400))
+                            } else {
                                 alarmBtn.addClass("disabled")
                                 clearInterval(alarmBtn.attr("interval"));
-                                alarmBtn.css('background-color','rgba(0,0,0,0')
+                                alarmBtn.css('background-color', 'rgba(0,0,0,0')
                             }
                             if (!isNaN(minutes)) {
                                 card.find(".updatetime").text("last updated " + minutes + " mins ago")
-                            }
-                            else {
+                            } else {
                                 card.addClass("disabled")
                                 card.find(".updatetime").text("No data available")
                             }
 
 
-                        }
-                        else {
+                        } else {
                             card.find(".updatetime").text("No device assigned")
                             card.find(".hrvalue").text('n/a')
                             card.find(".spo2value").text('n/a')
@@ -1158,13 +1238,13 @@
 
     setInterval(function () {
         getcards()
-    }, 60000*3);
+    }, 60000 * 3);
 
-    function datasync(profileid, action,alarmid) {
+    function datasync(profileid, action, alarmid) {
         $.ajax({
             type: "GET",
             headers: {"X-CSRFToken": token},
-            url: "{% url 'service:notification' %}?profileid=" + profileid + "&action=" + action+"&alarmid=" + alarmid+"&staffid="+"{{ user }}",
+            url: "{% url 'service:notification' %}?profileid=" + profileid + "&action=" + action + "&alarmid=" + alarmid + "&staffid=" + "{{ user }}",
             success: function (result) {
                 if (result.status == "success") {
                     if (action == "datasync") {
@@ -1197,15 +1277,13 @@
         location.href = "{% url 'service:downloadcsv' %}?profileid=" + profileid
     }
 
-    var hrchart,spo2chart,stepchart,batterychart,sleepchart;
+    var hrchart, spo2chart, stepchart, batterychart, sleepchart;
 
-    function sleepChart(profileid)
-    {
+    function sleepChart(profileid) {
         var sleepctx = document.getElementById('sleepchart').getContext('2d');
         sleepctx.canvas.width = 2000;
         sleepctx.canvas.height = 1500;
-        if (sleepchart!=undefined)
-        {
+        if (sleepchart != undefined) {
             sleepchart.destroy();
         }
         sleepchart = new Chart(sleepctx, sleepcfg);
@@ -1220,20 +1298,50 @@
                 if (result.status == "success") {
 
                     var items = result.data.datapoints
-                    var total_sleep = result.data.total_sleep
-                    $("#total_sleep_duration").text( Math.floor(total_sleep / 60)+"h "+Math.ceil(total_sleep%60)+"m")
-                    $("#awakePert").text(Math.floor(result.data.total_awake*100)+"%")
-                    $("#awakeTime").text(Math.floor(result.data.total_awake*total_sleep/60)+"h "+Math.floor(result.data.total_awake*total_sleep%60)+"m")
-                    $("#remPert").text(Math.floor(result.data.total_rem*100)+"%")
-                    $("#remTime").text(Math.floor(result.data.total_rem*total_sleep/60)+"h "+Math.floor(result.data.total_rem*total_sleep%60)+"m")
-                    $("#lightPert").text(Math.floor(result.data.total_light*100)+"%")
-                    $("#lightTime").text(Math.floor(result.data.total_light*total_sleep/60)+"h "+Math.floor(result.data.total_light*total_sleep%60)+"m")
-                    $("#deepPert").text(Math.floor(result.data.total_deep*100)+"%")
-                    $("#deepTime").text(Math.floor(result.data.total_deep*total_sleep/60)+"h "+Math.floor(result.data.total_deep*total_sleep%60)+"m")
+                    var total_sleep = result.data.total_sleep * (result.data.total_rem + result.data.total_light + result.data.total_deep)
+                    $("#total_sleep_duration").text(Math.floor(total_sleep / 60) + "h " + Math.floor(total_sleep % 60) + "m")
+                    var beginDate = new Date(parseInt(items[0]))
+                    var endDate = new Date(parseInt(items[items.length - 1]))
+                    var sleep_begin = beginDate.getDate() + "/" + (beginDate.getMonth() + 1) + "/" + beginDate.getFullYear() + " " + beginDate.getHours() + ":" + beginDate.getMinutes();
+                    var sleep_end = endDate.getDate() + "/" + (endDate.getMonth() + 1) + "/" + endDate.getFullYear() + " " + endDate.getHours() + ":" + endDate.getMinutes();
+                    $("#total_sleep_period").text("(" + sleep_begin + " to " + sleep_end + ")")
+
+                    $("#awakePert").text((result.data.total_awake * 100).toFixed(2) + "%")
+                    $("#awakeTime").text(Math.floor(result.data.total_awake * total_sleep / 60) + "h " + Math.floor(result.data.total_awake * result.data.total_sleep % 60) + "m")
+                    $("#lightPert").text((result.data.total_rem * 100).toFixed(2) + "%")
+                    $("#lightTime").text(Math.floor(result.data.total_rem * total_sleep / 60) + "h " + Math.floor((result.data.total_rem * result.data.total_sleep) % 60) + "m")
+                    $("#remPert").text((result.data.total_light * 100).toFixed(2) + "%")
+                    $("#remTime").text(Math.floor(result.data.total_light * total_sleep / 60) + "h " + Math.floor(result.data.total_light * result.data.total_sleep % 60) + "m")
+                    $("#deepPert").text((result.data.total_deep * 100).toFixed(2) + "%")
+                    $("#deepTime").text(Math.floor(result.data.total_deep * total_sleep / 60) + "h " + Math.floor(result.data.total_deep * result.data.total_sleep % 60) + "m")
                     items.forEach(function (item, index) {
-                        sleepdata.push({"x": parseInt(item[0]), "y": item[1]})
+                        if (item[1] == 'Deep') {
+                            sleepdata.push({"x": parseInt(item[0]), "y": 1})
+                        } else if (item[1] == 'REM') {
+                            sleepdata.push({"x": parseInt(item[0]), "y": 2})
+                        } else if (item[1] == 'Light') {
+                            sleepdata.push({"x": parseInt(item[0]), "y": 3})
+                        } else if (item[1] == 'Awake') {
+                            sleepdata.push({"x": parseInt(item[0]), "y": 4})
+                        }
+
                     })
                     sleepdataset.data = sleepdata;
+                    backgroundColors = []
+                    for (var i = 0; i < sleepdataset.data.length; i++) {
+                        value = sleepdataset.data[i];
+                        if (value.y == 4) {
+                            backgroundColors.push('#e2b7ff')
+                        } else if (value.y == 2) {
+                            backgroundColors.push('#9acffa')
+                        } else if (value.y == 3) {
+                            backgroundColors.push('#2196F3')
+                        } else if (value.y == 1) {
+                            backgroundColors.push('#0960a5')
+                        }
+
+                    }
+                    sleepdataset.backgroundColor = backgroundColors;
                     sleepchart.update();
 
                     $("#sleepchartmodal").modal()
@@ -1244,12 +1352,148 @@
 
     }
 
+    var annotation_table, editor, crtProfileid;
+
+    function timestampToDatetimeInputString(timestamp) {
+        const date = new Date((timestamp + _getTimeZoneOffsetInMs()));
+        // slice(0, 16) includes minutes
+        return date.toISOString().slice(0, 16);
+    }
+
+    function _getTimeZoneOffsetInMs() {
+        return new Date().getTimezoneOffset() * -60 * 1000;
+    }
+
+    function refreshAnnoTable(startTime) {
+        var columnSet = [
+            {
+                title: "RowId",
+                id: "DT_RowId",
+                data: "id",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
+            {
+                title: "Timestamp",
+                data: "timestamp",
+                type: "datetime",
+                render: function (data, type, row, meta) {
+                    return moment.utc(data).local().format('DD/MM/YYYY HH:mm');
+                }
+            },
+            {
+                title: "Heart Rate",
+                data: "hr",
+                type: "text",
+            },
+            {
+                title: "Movement",
+                data: "spo2",
+                type: "text",
+            },
+            {
+                title: "Step",
+                data: "step",
+                type: "text",
+            },
+            {
+                title: "Label",
+                data: "label",
+                type: "text",
+            },
+        ]
+        if (annotation_table != null) {
+            annotation_table.destroy()
+            editor.destroy()
+        }
+        editor = new $.fn.dataTable.Editor({
+            table: "#annotationtable",
+            idSrc: 'id',
+            {#ajax: "{% url 'service:sensordata' %}?profileid=" + profileid,#}
+            fields: [
+                {
+                    label: "label:",
+                    name: "label"
+                }
+            ]
+
+        });
+
+
+        annotation_table = $('#annotationtable').DataTable({
+            responsive: true,
+            columns: columnSet,
+            pageLength: 12,
+            ajax: "{% url 'service:sensordata' %}?profileid=" + crtProfileid + "&starttime=" + startTime.getTime(),
+            dom: "Bfrtip",
+            order: [1, 'desc'],
+            buttons: [
+                {
+                    extend: 'selectAll',
+                    text: 'Select All',
+                    className: 'btn-outline-secondary btn-sm'
+                },
+                {
+                    extend: 'edit',
+                    text: 'Label',
+                    editor: editor
+                },
+                {
+                    extend: 'selected',
+                    text: 'Save',
+                    className: 'btn-outline-secondary btn-sm'
+                },
+                {
+                    extend: 'selected',
+                    text: 'Reset All',
+                    className: 'btn-outline-secondary btn-sm'
+                },
+            ],
+            select: true
+        });
+    }
+
+    $( "#annotation_last_hour" ).click(function() {
+        var startTime = new Date(document.getElementById('annotation_datetime_picker').value)
+        document.getElementById('annotation_datetime_picker').value = timestampToDatetimeInputString(startTime);
+        startTime.setHours(startTime.getHours()-1)
+        refreshAnnoTable(startTime)
+    });
+
+    $( "#annotation_next_hour" ).click(function() {
+        var startTime = new Date(document.getElementById('annotation_datetime_picker').value)
+        startTime.setHours(startTime.getHours()+1)
+        refreshAnnoTable(startTime)
+        startTime.setHours(startTime.getHours()+1)
+        document.getElementById('annotation_datetime_picker').value = timestampToDatetimeInputString(startTime);
+    });
+
+
+    function annoChart(profileid) {
+        crtProfileid = profileid
+        document.getElementById('annotation_datetime_picker').value = timestampToDatetimeInputString(Date.now());
+
+        $("#annotation_datetime_picker").on("change.datetimepicker", ({date, oldDate}) => {
+            var startTime = new Date(document.getElementById('annotation_datetime_picker').value)
+            refreshAnnoTable(startTime)
+        })
+
+        var startTime = new Date(document.getElementById('annotation_datetime_picker').value)
+        startTime.setHours(startTime.getHours() - 1)
+        refreshAnnoTable(startTime)
+
+
+        $("#annotationmodal").modal()
+
+
+    }
+
     function chart(profileid) {
         var hrctx = document.getElementById('hrchart').getContext('2d');
         hrctx.canvas.width = 2000;
         hrctx.canvas.height = 550;
-        if (hrchart!=undefined)
-        {
+        if (hrchart != undefined) {
             hrchart.destroy();
         }
         hrchart = new Chart(hrctx, cfg);
@@ -1261,8 +1505,7 @@
         var spo2ctx = document.getElementById('spo2chart').getContext('2d');
         spo2ctx.canvas.width = 2000;
         spo2ctx.canvas.height = 550;
-        if (spo2chart!=undefined)
-        {
+        if (spo2chart != undefined) {
             spo2chart.destroy();
         }
         spo2chart = new Chart(spo2ctx, cfg_spo2);
@@ -1275,8 +1518,7 @@
         var stepctx = document.getElementById('stepchart').getContext('2d');
         stepctx.canvas.width = 2000;
         stepctx.canvas.height = 550;
-        if (stepchart!=undefined)
-        {
+        if (stepchart != undefined) {
             stepchart.destroy();
         }
         stepchart = new Chart(stepctx, cfg1);
@@ -1288,8 +1530,7 @@
         var batteryctx = document.getElementById('batterychart').getContext('2d');
         batteryctx.canvas.width = 2000;
         batteryctx.canvas.height = 550;
-        if (batterychart!=undefined)
-        {
+        if (batterychart != undefined) {
             batterychart.destroy();
         }
         batterychart = new Chart(batteryctx, cfg2);
@@ -1313,50 +1554,52 @@
                     min_timestamp = 2000000000000
                     max_timestamp = 0
                     items.forEach(function (item, index) {
-                        if (item.hr>0){
-                            if (item.hr>max_hr){max_hr = item.hr}
-                            if(item.hr<min_hr){min_hr = item.hr}
+                        if (item.hr > 0) {
+                            if (item.hr > max_hr) {
+                                max_hr = item.hr
+                            }
+                            if (item.hr < min_hr) {
+                                min_hr = item.hr
+                            }
                             hrdata.push({"x": item.timestamp, "y": item.hr})
-                        }
-                        else if(item.hr==null)
-                        {
+                        } else if (item.hr == null) {
                             hrdata.push({"x": item.timestamp, "y": 0})
                         }
 
-                        if (item.spo2>0){
-                            if (item.spo2>max_rr){max_rr = item.spo2}
-                            if(item.spo2<min_rr){min_rr = item.spo2}
+                        if (item.spo2 > 0) {
+                            if (item.spo2 > max_rr) {
+                                max_rr = item.spo2
+                            }
+                            if (item.spo2 < min_rr) {
+                                min_rr = item.spo2
+                            }
                             spo2data.push({"x": item.timestamp, "y": item.spo2})
-                        }
-                        else if(item.spo2==null)
-                        {
+                        } else if (item.spo2 == null) {
                             spo2data.push({"x": item.timestamp, "y": 0})
                         }
                         stepdata.push({"t": item.timestamp, "y": item.step})
                         batterydata.push({"x": item.timestamp, "y": item.battery})
-                        if(item.timestamp>max_timestamp)
-                        {
+                        if (item.timestamp > max_timestamp) {
                             max_timestamps = item.timestamp
                         }
 
-                        if(item.timestamp<min_timestamp)
-                        {
+                        if (item.timestamp < min_timestamp) {
                             min_timestamp = item.timelineTime
                         }
 
                     })
 
                     hrdataset.data = hrdata;
-                    hrchart.options.scales.yAxes[0].ticks.max = max_hr+5;
-                    hrchart.options.scales.yAxes[0].ticks.min = min_hr-5;
+                    hrchart.options.scales.yAxes[0].ticks.max = max_hr + 5;
+                    hrchart.options.scales.yAxes[0].ticks.min = min_hr - 5;
 
                     hrchart.options.scales.xAxes[0].ticks.max = max_timestamp
                     hrchart.options.scales.xAxes[0].ticks.min = min_timestamp
                     hrchart.update();
 
                     spo2dataset.data = spo2data;
-                    spo2chart.options.scales.yAxes[0].ticks.max = max_rr+0.1;
-                    spo2chart.options.scales.yAxes[0].ticks.min = min_rr-0.1;
+                    spo2chart.options.scales.yAxes[0].ticks.max = max_rr + 0.1;
+                    spo2chart.options.scales.yAxes[0].ticks.min = min_rr - 0.1;
 
                     spo2chart.options.scales.xAxes[0].ticks.max = max_timestamp
                     spo2chart.options.scales.xAxes[0].ticks.min = min_timestamp
@@ -1430,8 +1673,15 @@
         $("#sleepchartmodal").modal("hide")
     })
 
+    $("#annotation_modal_close_button").on("click", () => {
+        $("#annotationmodal").modal("hide")
+        crtProfileid=""
+    })
+
     $(document).ready(function () {
         getcards()
+
+
     });
 
 

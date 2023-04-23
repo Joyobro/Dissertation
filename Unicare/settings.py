@@ -81,9 +81,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'solecare',
-        'USER': 'solecare',
-        'PASSWORD': 'Solecare2022?',
-        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+        'USER': 'liguo',#'solecare',
+        'PASSWORD': 'Wp21910!',#'Solecare2022?',
+        'HOST': '178.79.130.53',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }
 }

@@ -335,6 +335,7 @@ def sensordata(request):
     if(request.method=="POST"):
         try:
             sensor_data_array = json.loads(request.body)
+
             # hm = HeartRate()
             # print(request.META['CONTENT_LENGTH'])
             # print(request.content_params.get("CONTENT_LENGTH"))
@@ -429,33 +430,7 @@ def sensordata(request):
                                                 stress=0.0,bloodpressure=None,spo2=spo2,sleeping=False,processed=False,alarm=False,label=label)
                     sensordata.save()
 
-                    #alarmtype==0 /notworn
-                    # if(sensor['status']=='notworn' and sensor["batteryStatus"]==0):
-                    #     alarm = Alarm(deviceid=id,profileid=result["id"],timestamp=sensor["timestamp"],solved=False,alarmtype=0)
-                    #     alarm.save()
-                    # elif (sensor['status']=='worn' or sensor["batteryStatus"]==1):
-                    #     Alarm.objects.filter(profileid=result["id"],solved=0,alarmtype=0).update(solved=True,actiontime=sensor["timestamp"],responsetime=sensor["timestamp"])
 
-                    # profile_conf = result["devicesetup"]
-                    # profile_conf = json.loads(profile_conf)
-                    # today = datetime.now()
-                    # start = today - timedelta(hours = 24)#datetime(today.year, today.month, today.day, today.hour-8)
-                    # sensordata = Sensordata.objects.filter(profileid=result["id"],
-                    #                                        timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).order_by("timestamp").values("timestamp","status","accelerometer");
-
-                    # sensordata = list(sensordata)
-                    # data_interval = int(profile_conf["datainterval"])
-                    # if(len(sensordata)>=int(60/data_interval)*2): #not having enough data (2 hours here)
-                    #     sleep_blocks = SleepAnalizer(data_interval).process_signal(sensordata)
-                    #     Sensordata.objects.filter(profileid=result["id"],
-                    #                               timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
-                    #
-                    #     for sleep_block in sleep_blocks:
-                    #         # print("from:",datetime.fromtimestamp(sleep_block[0]/1000.0).strftime("%H:%M"))
-                    #         # print("to:",datetime.fromtimestamp(sleep_block[1]/1000.0).strftime("%H:%M"))
-                    #         Sensordata.objects.filter(profileid=result["id"],timestamp__range=(sleep_block[0],sleep_block[1])).update(sleeping=True)
-                    #
-                    #     Sensordata.objects.filter(profileid=result["id"], timestamp__range=(start.timestamp()*1000,today.timestamp()*1000),processed=False).update(processed=True)
             return JsonResponse({"result": json.loads(result["devicesetup"])}, safe=False)
         except Exception as e:
             traceback.print_exc()
@@ -474,11 +449,19 @@ def sensordata(request):
             else:
                 hours = 12
             # today = datetime.now().date()
-            today = datetime.now()
-            start = today - timedelta(hours = hours)#datetime(today.year, today.month, today.day, today.hour-8)
-            sensordata = Sensordata.objects.filter(profileid=profileid,
-                                                   timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("timestamp","hr","step","battery","spo2","ppg");
-            return JsonResponse({"status":"success","data": list(sensordata)}, safe=False)
+            if ("starttime" in request.GET.keys()):
+                today = datetime.fromtimestamp(int(request.GET['starttime'])/1000)
+                hours = 1
+                start = today+timedelta(hours = hours)
+                sensordata = Sensordata.objects.filter(profileid=profileid,
+                                                       timestamp__range=(today.timestamp()*1000, start.timestamp()*1000)).order_by("timestamp").values("id","timestamp","hr","step","battery","spo2","ppg","accelerometer","label");
+                return JsonResponse({"status":"success","data": list(sensordata)}, safe=False)
+            else:
+                today = datetime.now()
+                start = today - timedelta(hours = hours)#datetime(today.year, today.month, today.day, today.hour-8)
+                sensordata = Sensordata.objects.filter(profileid=profileid,
+                                                       timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("id","timestamp","hr","step","battery","spo2","ppg","accelerometer","label");
+                return JsonResponse({"status":"success","data": list(sensordata)}, safe=False)
 
 
 class Echo:

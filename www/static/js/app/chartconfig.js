@@ -300,16 +300,13 @@ var cfg2 = {
 
 var sleepcfg = {
     data: {
-        yLabels: ['Deep','Light','REM','Awake'],
+        // yLabels: ['Deep','Light','REM','Awake'],
         datasets: [{
-
-            backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
-            borderColor: window.chartColors.red,
             data: [],
-            type: 'scatter',
+            type: 'bar',
             showLine: false,
-            pointRadius: 2,
-            borderWidth: 0,
+            // pointRadius: 4,
+            // borderWidth: 0,
             fill: false,
             lineTension: 0
         }]
@@ -342,16 +339,26 @@ var sleepcfg = {
                 },
 
             }],
+
             yAxes: [{
                 gridLines: {
-                    display:false
+                    display:true
                 },
                 scaleLabel: {
                     display: false,
                 },
-                type: 'category',
+                // type: 'category',
                 ticks: {
-                    reverse: true
+                    suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
+                    // OR //
+                    // display: false,
+                    stepSize: 1,
+                    fontColor:"#121a2e",
+                    beginAtZero: true,   // minimum value will be 0.
+                    callback:function(value) {
+                        var x = ["","Deep", "Light", "REM", "Awake"];
+                        return x[value | 0];
+                    }
                 }
             }]
         },
@@ -360,11 +367,7 @@ var sleepcfg = {
             mode: 'index',
             callbacks: {
                 label: function (tooltipItem, myData) {
-                    var label = myData.datasets[tooltipItem.datasetIndex].label || '';
-                    if (label) {
-                        label += ': ';
-                    }
-                    label += parseFloat(tooltipItem.value).toFixed(2);
+                    var label = ""
                     return label;
                 }
             }
