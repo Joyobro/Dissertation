@@ -454,13 +454,13 @@ def sensordata(request):
                 hours = 1
                 start = today+timedelta(hours = hours)
                 sensordata = Sensordata.objects.filter(profileid=profileid,
-                                                       timestamp__range=(today.timestamp()*1000, start.timestamp()*1000)).order_by("timestamp").values("id","timestamp","hr","step","battery","spo2","ppg","accelerometer","label");
+                                                       timestamp__range=(today.timestamp()*1000, start.timestamp()*1000)).order_by("timestamp").values("id","timestamp","hr","step","battery","spo2","ppg","accelerometer","status","label");
                 return JsonResponse({"status":"success","data": list(sensordata)}, safe=False)
             else:
                 today = datetime.now()
                 start = today - timedelta(hours = hours)#datetime(today.year, today.month, today.day, today.hour-8)
                 sensordata = Sensordata.objects.filter(profileid=profileid,
-                                                       timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("id","timestamp","hr","step","battery","spo2","ppg","accelerometer","label");
+                                                       timestamp__range=(start.timestamp()*1000,today.timestamp()*1000)).order_by("timestamp").values("id","timestamp","hr","step","battery","spo2","ppg","accelerometer","status","label");
                 return JsonResponse({"status":"success","data": list(sensordata)}, safe=False)
 
 
@@ -494,3 +494,19 @@ def downloadcsv(request):
         except Exception as e:
             traceback.print_exc()
             return JsonResponse({"result": "exceptions"}, safe=False)
+
+
+
+@csrf_exempt
+def annotate(request):
+    if(request.method=="POST"):
+        try:
+            annotations = json.loads(request.body)['data']
+            ids = list(annotations.keys())
+            for id in ids:
+                Sensordata.objects.update_or_create(id=id, defaults={"label":annotations[id]['label']})
+            data = list(Sensordata.objects.filter(pk__in=ids).values("id","timestamp","hr","step","battery","spo2","ppg","accelerometer","status","label"))
+            return JsonResponse({"data": data}, safe=False)
+        except Exception as e:
+            traceback.print_exc()
+            return JsonResponse({"error": "exceptions"}, safe=False)

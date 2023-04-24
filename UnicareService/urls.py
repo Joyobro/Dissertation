@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^dashboard$', views.dashboard, name='dashboard'),
     url(r'^device/register$', views.regdevice, name='regdevice'),
     url(r'^sensordata$', views.sensordata, name='sensordata'),
+    url(r'^annotate$', views.annotate, name='annotate'),
     url(r'^sleep$', views.sleep, name='sleep'),
     url(r'^downloadcsv$', views.downloadcsv, name='downloadcsv'),
     url(r'^adminsignin$', userviews.adminsignin, name='adminsignin'),

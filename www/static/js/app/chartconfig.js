@@ -323,7 +323,7 @@ var sleepcfg = {
                 type: 'time',
                 distribution: 'series',
                 gridLines: {
-                    display:false
+                    display: false
                 },
 
                 ticks: {
@@ -342,7 +342,7 @@ var sleepcfg = {
 
             yAxes: [{
                 gridLines: {
-                    display:true
+                    display: true
                 },
                 scaleLabel: {
                     display: false,
@@ -353,10 +353,10 @@ var sleepcfg = {
                     // OR //
                     // display: false,
                     stepSize: 1,
-                    fontColor:"#121a2e",
+                    fontColor: "#121a2e",
                     beginAtZero: true,   // minimum value will be 0.
-                    callback:function(value) {
-                        var x = ["","Deep", "Light", "REM", "Awake"];
+                    callback: function (value) {
+                        var x = ["", "Deep", "Light", "REM", "Awake"];
                         return x[value | 0];
                     }
                 }
@@ -371,6 +371,98 @@ var sleepcfg = {
                     return label;
                 }
             }
+        }
+    }
+};
+
+var annotation_cfg = {
+    data: {
+        datasets: [
+            {
+                backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+                borderColor: window.chartColors.red,
+                label: 'X',
+                data: [],
+                type: 'line',
+                showLine: true,
+                pointRadius: 0,
+                borderWidth: 0,
+                fill: false,
+                lineTension: 1
+            },
+            {
+                backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+                borderColor: window.chartColors.blue,
+                label: 'Y',
+                data: [],
+                type: 'line',
+                showLine: true,
+                pointRadius: 0,
+                borderWidth: 0,
+                fill: false,
+                lineTension: 1
+            },
+            {
+                backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+                borderColor: window.chartColors.yellow,
+                label: 'Z',
+                data: [],
+                type: 'line',
+                showLine: true,
+                pointRadius: 0,
+                borderWidth: 0,
+                fill: false,
+                lineTension: 1
+            }
+        ]
+    },
+    options: {
+        legend: {
+            display: true,
+            legendText: ['X', 'Y', 'Z']
+        },
+        animation: {
+            duration: 4
+        },
+        scales: {
+            xAxes: [{
+                type: 'time',
+                distribution: 'series',
+                offset: true,
+                ticks: {
+                    major: {
+                        enabled: true,
+                        fontStyle: 'bold'
+                    },
+                    source: 'data',
+                    autoSkip: true,
+                    autoSkipPadding: 75,
+                    maxRotation: 0,
+                    sampleSize: 100
+                },
+
+            }],
+            yAxes: [{
+                gridLines: {
+                    display:false,
+                    drawBorder: false
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Accelerometer (X,Y,Z)'
+                },
+                autoSkip: true,
+                // ticks: {
+                //     min: 0,    // minimum will be 0, unless there is a lower value.
+                //     max: 10,
+                //     stepSize: 1
+                // }
+            }]
+        },
+        showTooltips: false,
+        hover: {mode: null},
+        tooltips: {
+            enabled: false
         }
     }
 };

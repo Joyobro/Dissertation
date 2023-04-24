@@ -878,7 +878,7 @@
 
 <div id="annotationmodal" class="modal  fade" tabindex="0"
      role="dialog"
-     style="display: none;"
+     style="display: none;width:100%;autoWidth:true"
      aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="dialog">
         <div class="modal-content">
@@ -893,12 +893,13 @@
                     <button type="button" id="annotation_last_hour"
                             class="col-2  btn btn-xs btn-outline-info waves-effect waves-themed">Last Hour
                     </button>
-                    <input type="datetime-local" value=""  class='col-4 form-control-sm' id="annotation_datetime_picker"/>
+                    <input type="datetime-local" value="" class='col-4 form-control-sm'
+                           id="annotation_datetime_picker"/>
                     <button type="button" id="annotation_next_hour"
                             class="col-2  btn btn-xs btn-outline-info waves-effect waves-themed">Next Hour
                     </button>
                 </div>
-                <canvas id="signalchart"></canvas>
+                <canvas id="annotationchart"></canvas>
             </div>
 
             <div class="row" style="margin: 5pt">
@@ -1277,7 +1278,7 @@
         location.href = "{% url 'service:downloadcsv' %}?profileid=" + profileid
     }
 
-    var hrchart, spo2chart, stepchart, batterychart, sleepchart;
+    var hrchart, spo2chart, stepchart, batterychart, sleepchart, annotationchart, sensordata
 
     function sleepChart(profileid) {
         var sleepctx = document.getElementById('sleepchart').getContext('2d');
@@ -1383,6 +1384,11 @@
                 }
             },
             {
+                title: "Status",
+                data: "status",
+                type: "text",
+            },
+            {
                 title: "Heart Rate",
                 data: "hr",
                 type: "text",
@@ -1402,6 +1408,14 @@
                 data: "label",
                 type: "text",
             },
+
+            {
+                title: "Acclerometer",
+                data: "accelerometer",
+                "visible": false,
+                "searchable": false,
+                type: "readonly"
+            },
         ]
         if (annotation_table != null) {
             annotation_table.destroy()
@@ -1410,7 +1424,14 @@
         editor = new $.fn.dataTable.Editor({
             table: "#annotationtable",
             idSrc: 'id',
-            {#ajax: "{% url 'service:sensordata' %}?profileid=" + profileid,#}
+            ajax: {
+                url: "{% url 'service:annotate' %}?profileid=" + crtProfileid,
+                contentType: 'application/json',
+                data: function (d) {
+                    return JSON.stringify(d);
+                },
+                dataType: "json"
+            },
             fields: [
                 {
                     label: "label:",
@@ -1420,52 +1441,93 @@
 
         });
 
+        var annotationctx = document.getElementById('annotationchart').getContext('2d');
+        {#annotationctx.canvas.width = 2000;#}
+        annotationctx.canvas.height = 100;
+        if (annotationchart != undefined) {
+            annotationchart.destroy();
+        }
+        annotationchart = new Chart(annotationctx, annotation_cfg);
+
+        var accdataset_x = annotationchart.config.data.datasets[0];
+        var accdataset_y = annotationchart.config.data.datasets[1];
+        var accdataset_z = annotationchart.config.data.datasets[2];
+        var accdata_x = []
+        var accdata_y = []
+        var accdata_z = []
+
 
         annotation_table = $('#annotationtable').DataTable({
             responsive: true,
             columns: columnSet,
             pageLength: 12,
-            ajax: "{% url 'service:sensordata' %}?profileid=" + crtProfileid + "&starttime=" + startTime.getTime(),
+            ajax: {
+                "url": "{% url 'service:sensordata' %}?profileid=" + crtProfileid + "&starttime=" + startTime.getTime(),
+                "dataSrc": function (json) {
+                    {#console.log(json)#}
+                    var items = json.data
+                    items.forEach(function (item, index) {
+                        accdata_xyz = JSON.parse(item.accelerometer)
+                        if (accdata_xyz.length > 0) {
+                            var timestamp_step = 300 * 1000 /accdata_xyz.length
+                            var timestamp = item.timestamp
+                            accdata_xyz.forEach(function (accItem, index) {
+                                if (index%50==0)
+                                {
+                                    accdata_x.push({"x": timestamp+index*Math.ceil(timestamp_step), "y": accItem[0]})
+                                    accdata_y.push({"x": timestamp+index*Math.ceil(timestamp_step), "y": accItem[1]})
+                                    accdata_z.push({"x": timestamp+index*Math.ceil(timestamp_step), "y": accItem[2]})
+                                }
+                            })
+                        }
+                        {#accdata_x.push({"x": item.timestamp, "y": item.hr})#}
+                    })
+                    accdataset_x.data = accdata_x;
+                    accdataset_y.data = accdata_y;
+                    accdataset_z.data = accdata_z;
+                    annotationchart.update();
+                    return json.data;
+                }
+            },
             dom: "Bfrtip",
             order: [1, 'desc'],
-            buttons: [
-                {
-                    extend: 'selectAll',
-                    text: 'Select All',
-                    className: 'btn-outline-secondary btn-sm'
-                },
-                {
-                    extend: 'edit',
-                    text: 'Label',
-                    editor: editor
-                },
-                {
-                    extend: 'selected',
-                    text: 'Save',
-                    className: 'btn-outline-secondary btn-sm'
-                },
-                {
-                    extend: 'selected',
-                    text: 'Reset All',
-                    className: 'btn-outline-secondary btn-sm'
-                },
-            ],
-            select: true
-        });
+            buttons:
+                [
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'btn-outline-secondary btn-sm'
+                    },
+                    {
+                        extend: 'edit',
+                        text: 'Label',
+                        editor: editor
+                    },
+                ],
+            select
+    :
+        true
     }
 
-    $( "#annotation_last_hour" ).click(function() {
+    )
+        ;
+
+
+        //node.context is element of tr generated by jQuery DataTables.
+    }
+
+    $("#annotation_last_hour").click(function () {
         var startTime = new Date(document.getElementById('annotation_datetime_picker').value)
         document.getElementById('annotation_datetime_picker').value = timestampToDatetimeInputString(startTime);
-        startTime.setHours(startTime.getHours()-1)
+        startTime.setHours(startTime.getHours() - 1)
         refreshAnnoTable(startTime)
     });
 
-    $( "#annotation_next_hour" ).click(function() {
+    $("#annotation_next_hour").click(function () {
         var startTime = new Date(document.getElementById('annotation_datetime_picker').value)
-        startTime.setHours(startTime.getHours()+1)
+        startTime.setHours(startTime.getHours() + 1)
         refreshAnnoTable(startTime)
-        startTime.setHours(startTime.getHours()+1)
+        startTime.setHours(startTime.getHours() + 1)
         document.getElementById('annotation_datetime_picker').value = timestampToDatetimeInputString(startTime);
     });
 
@@ -1675,7 +1737,7 @@
 
     $("#annotation_modal_close_button").on("click", () => {
         $("#annotationmodal").modal("hide")
-        crtProfileid=""
+        crtProfileid = ""
     })
 
     $(document).ready(function () {
