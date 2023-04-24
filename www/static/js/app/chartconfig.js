@@ -424,6 +424,16 @@ var annotation_cfg = {
         animation: {
             duration: 4
         },
+        annotation: {
+            annotations: [
+                // {
+                //     drawTime: "afterDraw",
+                //     type: "box",
+                //     backgroundColor: 'rgba(93, 240, 184, 0.25)',
+                //     borderWidth: 0
+                // }
+            ]
+        },
         scales: {
             xAxes: [{
                 type: 'time',
@@ -444,7 +454,7 @@ var annotation_cfg = {
             }],
             yAxes: [{
                 gridLines: {
-                    display:false,
+                    display: false,
                     drawBorder: false
                 },
                 scaleLabel: {
